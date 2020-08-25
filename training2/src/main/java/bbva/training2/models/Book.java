@@ -1,14 +1,12 @@
 package bbva.training2.models;
 
-import java.time.Year;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+
 
 @Entity
 @Table(name="books")
@@ -57,6 +55,11 @@ public class Book {
         this.publisher = publisher;
         this.year = year;
         this.pages = pages;
+        this.isbn = isbn;
+    }
+
+    public Book(String title, String isbn) {
+        this.title = title;
         this.isbn = isbn;
     }
 

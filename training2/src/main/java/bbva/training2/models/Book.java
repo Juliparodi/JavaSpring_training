@@ -9,35 +9,27 @@ import javax.persistence.Table;
 
 
 @Entity
-@Table(name="books")
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false)
     private String genre;
 
-    @Column(nullable = false)
     private String author;
 
-    @Column(nullable = false)
     private String image;
 
     @Column(nullable = false, unique = true)
     private String title;
 
-    @Column(nullable = false)
     private String subtitle;
 
-    @Column(nullable = false)
     private String publisher;
 
-    @Column(nullable = false)
     private String year;
 
-    @Column(nullable = false)
     private Integer pages;
 
     @Column(nullable = false, unique = true)

@@ -6,13 +6,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
-    List<Book> findByTitle(String title);
-
-    String findByAuthor(String author);
 
     Book save(Book Book);
 
     List<Book> findAll();
+
+    Book findByTitle(String title);
+
 
 
     /*

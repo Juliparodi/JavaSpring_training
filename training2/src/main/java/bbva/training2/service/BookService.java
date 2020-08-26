@@ -20,25 +20,21 @@ public class BookService {
         return bookRepository.findAll();
     }
 
-    /*
+    public Book findByTitle(String title) {
+        return bookRepository.findByTitle(title);
+    }
+
+    public Book insertOrUpdate(Book book) {
+        return bookRepository.save(book);
+    }
+
+    public List<Book> saveAll(List<Book> books) {
+        return bookRepository.saveAll(books);
+    }
+
+       /*
     public List<Book> getBooksCustomQuery(){
         return bookRepository.getBooksCustomQuery();
     }
 */
-
-    public void saveBook(String title) {
-        bookRepository.save(new Book(title, "123"));
-    }
-
-    public List<Book> saveAll() {
-        List<Book> books = new ArrayList<>();
-        books.add(new Book("Hercules", "123"));
-        books.add(new Book("IT", "124"));
-        books.add(new Book("Shakespere", "125"));
-        return bookRepository.saveAll(books);
-    }
-
-    public Book save(Book book) {
-        return bookRepository.save(book);
-    }
 }

@@ -4,19 +4,21 @@ import bbva.training2.models.Book;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    Book save(Book Book);
-
-    List<Book> findAll();
 
     Book findByTitle(String title);
 
+    Book findByIsbn(String isbn);
 
+    Integer deleteByTitle(String title);
 
-    /*
-    @Query("select u from books u")
-    public List<Book> getBooksCustomQuery();
-*/
+    List<Book> deleteByIsbn(String isbn);
+
+    @Query(value = "SELECT u FROM Book u WHERE u.isbn = ?1")
+    Book getBooksCustomQuery(String isbn);
+
+    Book findByGenre(String genre);
 }

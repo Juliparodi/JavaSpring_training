@@ -1,7 +1,6 @@
 package bbva.training2.exceptions;
 
-import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.dao.DataIntegrityViolationException;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +26,11 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleBookNotFoundException(BookNotFoundException ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(),
             HttpStatus.NOT_FOUND, request);
+    }
+
+    @ExceptionHandler({BookAlreadyOwnException.class})
+    protected ResponseEntity<Object> handleBookAlreadyOwn(BookAlreadyOwnException ex, WebRequest request){
+        return new ResponseEntity(ex, new HttpHeaders(), HttpStatus.CONFLICT);
     }
 
 

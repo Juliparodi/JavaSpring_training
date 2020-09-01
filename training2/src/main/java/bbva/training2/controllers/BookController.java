@@ -49,10 +49,10 @@ public class BookController {
     @PutMapping("/update/{id}")
     public ResponseEntity<Optional<Book>> updateBookById(@RequestBody Book book,
         @PathVariable Long id) {
-        if (book.getId() != id) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "El id del objeto y parametro difieren");
+        if (book.getIdBook() != id) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "ID object and ID parameter are not the same");
         } else if (!bookService.findById(id).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encuentra el ID solicitado");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ID not found");
         }
         return new ResponseEntity(
             Optional.of(bookService.insertOrUpdate(book)),
@@ -63,7 +63,7 @@ public class BookController {
     public ResponseEntity<Book> updateBookByTitle(@RequestParam("Title") String Title, @RequestBody Book book) {
         if (!book.getTitle().equals(Title)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Los generos del objeto y parametro difieren");
+                "Object genre and parameter genre are not the same");
         } else if (bookService.findByTitle(Title)==(null)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book with given Title not found");
         }

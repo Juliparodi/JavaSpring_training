@@ -1,0 +1,14 @@
+
+{
+    "claveDigital":"micd1122",
+    "documento":{
+        "genero":null,
+        "numeroDocumento":"12023625",
+        "tipoDocumento":{
+           "codigoTipoDocumento":"0",
+           "descripcion":"DNI",
+           "descripcionCorta":"DNI"
+        }
+    },
+    "usuario":"miusuario"
+}

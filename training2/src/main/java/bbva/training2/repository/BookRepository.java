@@ -2,12 +2,14 @@ package bbva.training2.repository;
 
 import bbva.training2.models.Book;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
 
+    Optional<Book> findByIdBook(int id);
 
     Book findByTitle(String title);
 

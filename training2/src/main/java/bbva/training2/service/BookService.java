@@ -50,11 +50,11 @@ public class BookService {
     }
 
     public Optional<Book> findById(Long id) {
-        if (!bookRepository.findById(id).isPresent()) {
+        if (!bookRepository.findByIdBook(Math.toIntExact(id)).isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                 "Book with given ID is not present in catalog");
         }
-        return bookRepository.findById(id);
+        return bookRepository.findByIdBook(Math.toIntExact(id));
     }
 
     public List<Book> addAll(List<Book> books) {

@@ -23,4 +23,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Book getBooksCustomQuery(String isbn);
 
     Book findByGenre(String genre);
+
+    @Query(value = "SELECT u FROM Book u WHERE u.genre = ?1 AND u.publisher = ?2  AND u.year = ?3")
+    Book getByFilterQuery(String genre, String publisher, String year);
 }

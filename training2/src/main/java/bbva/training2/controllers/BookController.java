@@ -1,6 +1,7 @@
 package bbva.training2.controllers;
 
 import bbva.training2.exceptions.BookNotFoundException;
+import bbva.training2.external.services.OpenLibraryService;
 import bbva.training2.models.Book;
 import bbva.training2.repository.BookRepository;
 import bbva.training2.service.BookService;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
+import javax.validation.Valid;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -36,8 +38,11 @@ public class BookController {
     @Autowired
     private BookService bookService;
 
+    @Autowired
+    private OpenLibraryService openLibraryService;
+
     @PostMapping("/add")
-    public ResponseEntity<Book> add(@RequestBody Book book) {
+    public ResponseEntity<Book> add(@Valid @RequestBody Book book) {
         return new ResponseEntity(bookService.insertOrUpdate(book), HttpStatus.CREATED);
     }
 
@@ -89,8 +94,8 @@ public class BookController {
                 , HttpStatus.OK);
         }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Optional<Book>> findById(@PathVariable long id) {
+    @GetMapping("/find")
+    public ResponseEntity<Optional<Book>> findById(@RequestParam ("id") Long id) {
         return new ResponseEntity(
             Optional.of(bookService.findById(id).get()),
             HttpStatus.OK);
@@ -98,7 +103,7 @@ public class BookController {
 
    @GetMapping("/find/{isbn}")
     public ResponseEntity<Book> findByIsbn(@PathVariable String isbn){
-        return new ResponseEntity(bookService.findByIsbn(isbn), HttpStatus.OK);
+        return new ResponseEntity(bookService.findByIsbn(isbn, openLibraryService), HttpStatus.OK);
    }
 
     @GetMapping("/query")
@@ -110,6 +115,12 @@ public class BookController {
     public String greeting(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) {
         model.addAttribute("name", name);
         return "greeting.html";
+    }
+
+    @GetMapping("find/customQuery")
+    public ResponseEntity<Book> findByQuery(@RequestParam("genre") String genre,
+        @RequestParam("publisher") String publisher, @RequestParam("year") String year){
+        return new ResponseEntity(bookService.getByFilterQuery(genre, publisher, year), HttpStatus.OK);
     }
 }
 

@@ -1,8 +1,10 @@
 package bbva.training2.controllers;
 
 
+import bbva.training2.exceptions.errors.UserHttpErrors;
 import bbva.training2.models.Book;
 import bbva.training2.models.User;
+import bbva.training2.repository.UserRepository;
 import bbva.training2.service.BookService;
 import bbva.training2.service.UserService;
 import io.swagger.annotations.Api;
@@ -11,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -38,6 +42,9 @@ public class UserController {
 
     @Autowired
     private BookService bookService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("addall")
     @ApiOperation(value = "given a User list, add all to our repository", response = User.class)
@@ -113,6 +120,33 @@ public class UserController {
         return new ResponseEntity(userFound.getBooks(), HttpStatus.OK);
     }
 
+    @GetMapping("find/birthdate")
+    @ApiOperation(value = "Given two dates, return values in between", response = User.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully collection of books response"),
+        @ApiResponse(code = 404, message = "User not found"),
+        @ApiResponse(code = 405, message = "Method Not Allowed"),
+        @ApiResponse(code = 401, message = "Access unauthorized."),
+        @ApiResponse(code = 403, message = "Access unauthorized."),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
+    public ResponseEntity<List<Book>> filterByDates(@RequestParam(name = "startDate", required = true) String date1,
+        @RequestParam(name = "endDate", required = true) String date2) {
+        return new ResponseEntity(userService.foundUserByBetweenBirthday(
+            LocalDate.parse(date1), LocalDate.parse(date2)), HttpStatus.OK);
+    }
+
+    @GetMapping("find/sequence")
+    @ApiOperation(value = "Given a sequence, find by contains name, and return the user list or an exception", response = User.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseEntity<List<User>> foundUserByContainsName(@RequestParam ("sequence") String sequence){
+        List<User> list = userRepository.findByNameContaining(sequence);
+        if (list.isEmpty()){
+            new UserHttpErrors("Users not found").userNotFound();
+        }
+        return new ResponseEntity(list, HttpStatus.OK);
+    }
+
     @PutMapping("update/{name}")
     public ResponseEntity<User> updateUser(@RequestBody User user, @PathVariable String name) {
         if (!user.getName().equalsIgnoreCase(name)) {
@@ -122,7 +156,7 @@ public class UserController {
         return new ResponseEntity(userService.updateUser(user, name), HttpStatus.OK);
     }
 
-    @PutMapping ("books")
+    @PutMapping ("books/birthdate")
     public ResponseEntity<User> addBookToCollection(@RequestParam(name="title", required = true) String title,
         @RequestParam(name="username", required = true) String userName){
 

@@ -1,11 +1,14 @@
 package bbva.training2.service;
 
+import bbva.training2.models.Book;
 import bbva.training2.models.User;
 
 import bbva.training2.repository.UserRepository;
+import java.time.LocalDate;
 import java.util.List;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -64,5 +67,12 @@ public class UserService {
         userToUpdate.setUserName(user.getUserName());
         userToUpdate.setBirthDate(user.getBirthDate());
         return userToUpdate;
+    }
+
+    public List<User> foundUserByBetweenBirthday(LocalDate date1, LocalDate date2) {
+        List<User> booksFound = userRepository.findAll();
+        booksFound.stream().filter(x -> x.getBirthDate().isAfter(date1) && x.getBirthDate().isBefore(date2))
+            .collect(Collectors.toList());
+        return booksFound;
     }
 }

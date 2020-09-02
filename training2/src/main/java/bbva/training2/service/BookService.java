@@ -1,6 +1,7 @@
 package bbva.training2.service;
 
 import bbva.training2.exceptions.BookNotFoundException;
+import bbva.training2.external.services.OpenLibraryService;
 import bbva.training2.models.Book;
 import bbva.training2.repository.BookRepository;
 import java.util.List;
@@ -30,10 +31,9 @@ public class BookService {
         return bookRepository.findByTitle(title);
     }
 
-    public Book findByIsbn(String isbn) {
+    public Book findByIsbn(String isbn, OpenLibraryService openLibraryService) {
         if (bookRepository.findByIsbn(isbn)==(null)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Book with given isbn is not present in our catalog ");
+            return openLibraryService.bookInfo(isbn);
         }
         return bookRepository.findByIsbn(isbn);
     }
@@ -71,5 +71,9 @@ public class BookService {
 
     public Book findByGenre(String genre) {
         return bookRepository.findByGenre(genre);
+    }
+
+    public Book getByFilterQuery(String genre, String publisher, String year) {
+        return bookRepository.getByFilterQuery(genre, publisher, year);
     }
 }

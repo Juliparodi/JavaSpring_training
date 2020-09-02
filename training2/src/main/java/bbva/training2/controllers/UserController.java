@@ -156,7 +156,7 @@ public class UserController {
         return new ResponseEntity(userService.updateUser(user, name), HttpStatus.OK);
     }
 
-    @PutMapping ("books/birthdate")
+    @PutMapping ("books")
     public ResponseEntity<User> addBookToCollection(@RequestParam(name="title", required = true) String title,
         @RequestParam(name="username", required = true) String userName){
 

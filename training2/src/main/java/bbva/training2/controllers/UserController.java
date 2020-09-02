@@ -138,6 +138,15 @@ public class UserController {
 
     @GetMapping("find/sequence")
     @ApiOperation(value = "Given a sequence, find by contains name, and return the user list or an exception", response = User.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully get list of user"),
+        @ApiResponse(code = 404, message = "User not found"),
+        @ApiResponse(code = 405, message = "Method Not Allowed"),
+        @ApiResponse(code = 401, message = "Access unauthorized."),
+        @ApiResponse(code = 403, message = "Access unauthorized."),
+        @ApiResponse(code = 409, message = "User is already on the DB."),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ResponseEntity<List<User>> foundUserByContainsName(@RequestParam ("sequence") String sequence){
         List<User> list = userRepository.findByNameContaining(sequence);
@@ -148,6 +157,17 @@ public class UserController {
     }
 
     @PutMapping("update/{name}")
+    @ApiOperation(value = "Given a name, update user", response = User.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully get list of user"),
+        @ApiResponse(code = 404, message = "User not found"),
+        @ApiResponse(code = 405, message = "Method Not Allowed"),
+        @ApiResponse(code = 401, message = "Access unauthorized."),
+        @ApiResponse(code = 403, message = "Access unauthorized."),
+        @ApiResponse(code = 409, message = "User is already on the DB."),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<User> updateUser(@RequestBody User user, @PathVariable String name) {
         if (!user.getName().equalsIgnoreCase(name)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -157,6 +177,17 @@ public class UserController {
     }
 
     @PutMapping ("books")
+    @ApiOperation(value = "Given title of the book and username, update user's book collection", response = User.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully get list of user"),
+        @ApiResponse(code = 404, message = "User not found"),
+        @ApiResponse(code = 405, message = "Method Not Allowed"),
+        @ApiResponse(code = 401, message = "Access unauthorized."),
+        @ApiResponse(code = 403, message = "Access unauthorized."),
+        @ApiResponse(code = 409, message = "User is already on the DB."),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<User> addBookToCollection(@RequestParam(name="title", required = true) String title,
         @RequestParam(name="username", required = true) String userName){
 
@@ -167,6 +198,16 @@ public class UserController {
     }
 
     @DeleteMapping("delete/{userName}")
+    @ApiOperation(value = "Given a username, delete that user and return count of users deleted", response = User.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully get list of user"),
+        @ApiResponse(code = 404, message = "User not found"),
+        @ApiResponse(code = 405, message = "Method Not Allowed"),
+        @ApiResponse(code = 401, message = "Access unauthorized."),
+        @ApiResponse(code = 403, message = "Access unauthorized."),
+        @ApiResponse(code = 409, message = "User is already on the DB."),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
     public ResponseEntity<Integer> deleteUser(@PathVariable String userName){
         if (userName.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NO_CONTENT, "parameter userName is empty");
@@ -175,6 +216,16 @@ public class UserController {
     }
 
     @DeleteMapping("delete/books")
+    @ApiOperation(value = "Given title of the book and username, delete book of that user's collection", response = User.class)
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Successfully get list of user"),
+        @ApiResponse(code = 404, message = "User not found"),
+        @ApiResponse(code = 405, message = "Method Not Allowed"),
+        @ApiResponse(code = 401, message = "Access unauthorized."),
+        @ApiResponse(code = 403, message = "Access unauthorized."),
+        @ApiResponse(code = 409, message = "User is already on the DB."),
+        @ApiResponse(code = 500, message = "Internal Server Error")
+    })
     public ResponseEntity<List<Book>> deleteBookFromCollection(@RequestParam(name="title", required = true) String title,
         @RequestParam(name="username", required = true) String userName){
         User userFound = userService.findByUserName(userName).get();

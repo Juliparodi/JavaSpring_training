@@ -41,7 +41,6 @@ public class Book {
     @Column(nullable = false, unique = true)
     private String title;
 
-    @Column(nullable = false)
     private String subtitle;
 
     @Column(nullable = false)

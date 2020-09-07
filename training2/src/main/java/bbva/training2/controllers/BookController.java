@@ -39,6 +39,9 @@ public class BookController {
     private BookService bookService;
 
     @Autowired
+    private BookRepository bookRepository;
+
+    @Autowired
     private OpenLibraryService openLibraryService;
 
     @PostMapping("/add")
@@ -48,7 +51,7 @@ public class BookController {
 
     @PostMapping("/addall")
     public ResponseEntity<List<Book>> addAll(@RequestBody List<Book> books){
-        return new ResponseEntity(bookService.addAll(books), HttpStatus.CREATED);
+        return new ResponseEntity(bookRepository.saveAll(books), HttpStatus.CREATED);
     }
 
     @PutMapping("/update/{id}")
@@ -80,12 +83,12 @@ public class BookController {
        if(bookService.findByTitle(title)==(null)){
            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book with given title not found");
        }
-       return new ResponseEntity(bookService.deleteByTitle(title), HttpStatus.OK);
+       return new ResponseEntity(bookRepository.deleteByTitle(title), HttpStatus.OK);
    }
 
     @GetMapping("/all")
     public ResponseEntity<Book> findAll() {
-        return new ResponseEntity(bookService.findAll(), HttpStatus.OK);
+        return new ResponseEntity(bookRepository.findAll(), HttpStatus.OK);
     }
 
     @GetMapping()
@@ -108,7 +111,7 @@ public class BookController {
 
     @GetMapping("/query")
     public ResponseEntity<Book> getBooksCustomerQuery(@RequestParam ("isbn") String isbn){
-        return new ResponseEntity(bookService.getBooksCustomQuery(isbn), HttpStatus.OK);
+        return new ResponseEntity(bookRepository.getBooksCustomQuery(isbn), HttpStatus.OK);
     }
 
     @GetMapping("/greeting")
@@ -118,9 +121,12 @@ public class BookController {
     }
 
     @GetMapping("find/customQuery")
-    public ResponseEntity<Book> findByQuery(@RequestParam("genre") String genre,
-        @RequestParam("publisher") String publisher, @RequestParam("year") String year){
-        return new ResponseEntity(bookService.getByFilterQuery(genre, publisher, year), HttpStatus.OK);
+    public ResponseEntity<List<Book>> findByQuery(
+        @RequestParam(name = "genre", required = false) String genre,
+        @RequestParam(name = "publisher", required = false) String publisher,
+        @RequestParam(name = "year", required = false) String year) {
+        return new ResponseEntity(bookService.getByFilterQuery(genre, publisher, year),
+            HttpStatus.OK);
     }
 }
 

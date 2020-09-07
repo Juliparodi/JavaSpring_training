@@ -54,6 +54,12 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "id_book"))
     private List<Book> books = new ArrayList<>();
 
+    public User(String name, String userName, LocalDate date) {
+        this.setName(name);
+        this.setUserName(userName);
+        this.setBirthDate(date);
+    }
+
     public void setUserName(String userName) {
         this.userName = userName;
     }
@@ -87,7 +93,7 @@ public class User {
     @Override
     public boolean equals(Object o) {
         User user = (User) o;
-        return Objects.equals(idUser, user.idUser) &&
+        return Objects.equals(userName, user.userName) &&
             Objects.equals(name, user.name);
     }
 

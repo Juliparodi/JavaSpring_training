@@ -4,11 +4,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.CONFLICT)
-public class BookAlreadyOwnException extends RuntimeException {
+public class UserAlreadyOwnException extends RuntimeException{
 
-
-    public BookAlreadyOwnException(String message){
-       super(message);
+    public UserAlreadyOwnException(String message){
+        super(message);
     }
 
 }

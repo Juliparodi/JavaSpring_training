@@ -24,6 +24,10 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     Book findByGenre(String genre);
 
-    @Query(value = "SELECT u FROM Book u WHERE u.genre = ?1 AND u.publisher = ?2  AND u.year = ?3")
-    Book getByFilterQuery(String genre, String publisher, String year);
+    @Query(value = "SELECT b FROM Book b "
+        + "WHERE "
+        + "(:publisher is null OR b.publisher = :publisher) AND "
+        + "(:genre is null OR b.genre = :genre) AND "
+        + "(:year is null OR b.year = :year)")
+    List<Book> getByFilterQuery(String genre, String publisher, String year);
 }

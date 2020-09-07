@@ -1,6 +1,8 @@
 package bbva.training2.service;
 
+import bbva.training2.exceptions.BookAlreadyOwnException;
 import bbva.training2.exceptions.BookNotFoundException;
+import bbva.training2.exceptions.errors.BookHttpErrors;
 import bbva.training2.external.services.OpenLibraryService;
 import bbva.training2.models.Book;
 import bbva.training2.repository.BookRepository;
@@ -19,10 +21,6 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
 
-    public List<Book> findAll(){
-        return bookRepository.findAll();
-    }
-
     public Book findByTitle(String title) {
         if (bookRepository.findByTitle(title)==(null)) {
             throw new BookNotFoundException(
@@ -40,40 +38,23 @@ public class BookService {
 
     public Book insertOrUpdate(Book book) {
         List<Book> books = bookRepository.findAll();
-        for (int i = 0; i < bookRepository.findAll().size(); i++) {
-            if (book.equals(books.get(i))) {
-                throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Given book is already defined in our catalog");
-            }
+        if (books.stream().anyMatch(x -> book.equals(x))){
+            throw new BookAlreadyOwnException("Book is already in our DB");
         }
         return bookRepository.save(book);
     }
 
     public Optional<Book> findById(Long id) {
-        if (!bookRepository.findByIdBook(Math.toIntExact(id)).isPresent()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "Book with given ID is not present in catalog");
+        return Optional.ofNullable(
+            bookRepository.findByIdBook(Math.toIntExact(id)).orElseThrow(
+                () -> new BookNotFoundException("Book with given ID is not present in catalog")));
+    }
+
+    public List<Book> getByFilterQuery(String genre, String publisher, String year) {
+        List<Book> books = bookRepository.getByFilterQuery(genre, publisher, year);
+        if (books.isEmpty()){
+             new BookHttpErrors("Books with given filters couldn't be find");
         }
-        return bookRepository.findByIdBook(Math.toIntExact(id));
-    }
-
-    public List<Book> addAll(List<Book> books) {
-        return bookRepository.saveAll(books);
-    }
-
-
-    public Integer deleteByTitle(String title){ return bookRepository.deleteByTitle(title); }
-
-
-    public Book getBooksCustomQuery(String isbn){
-        return bookRepository.getBooksCustomQuery(isbn);
-    }
-
-    public Book findByGenre(String genre) {
-        return bookRepository.findByGenre(genre);
-    }
-
-    public Book getByFilterQuery(String genre, String publisher, String year) {
-        return bookRepository.getByFilterQuery(genre, publisher, year);
+        return books;
     }
 }

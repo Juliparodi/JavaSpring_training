@@ -38,7 +38,6 @@ public class UserController {
 
     @Autowired
     private UserService userService;
-    @ApiModelProperty(notes = "to apply business logic into methotds")
 
     @Autowired
     private BookService bookService;
@@ -58,7 +57,7 @@ public class UserController {
         @ApiResponse(code = 500, message = "Internal Server Error")
     })
     public ResponseEntity<List<User>> addUser(@RequestBody List<User> users) {
-        return new ResponseEntity(userService.addAll(users), HttpStatus.CREATED);
+        return new ResponseEntity(userRepository.saveAll(users), HttpStatus.CREATED);
     }
 
     @PostMapping("add")
@@ -88,7 +87,7 @@ public class UserController {
         @ApiResponse(code = 500, message = "Internal Server Error")
     })
     public ResponseEntity<List<User>> getAllUsers() {
-        return new ResponseEntity(userService.getAll(), HttpStatus.OK);
+        return new ResponseEntity(userRepository.findAll(), HttpStatus.OK);
     }
 
     @GetMapping("{userName}")
@@ -130,8 +129,8 @@ public class UserController {
         @ApiResponse(code = 403, message = "Access unauthorized."),
         @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    public ResponseEntity<List<Book>> filterByDates(@RequestParam(name = "startDate", required = true) String date1,
-        @RequestParam(name = "endDate", required = true) String date2) {
+    public ResponseEntity<List<Book>> filterByDates(@RequestParam(name = "startDate") String date1,
+        @RequestParam(name = "endDate") String date2) {
         return new ResponseEntity(userService.foundUserByBetweenBirthday(
             LocalDate.parse(date1), LocalDate.parse(date2)), HttpStatus.OK);
     }

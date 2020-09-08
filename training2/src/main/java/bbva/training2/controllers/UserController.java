@@ -45,7 +45,7 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping("addall")
+    @PostMapping()
     @ApiOperation(value = "given a User list, add all to our repository", response = User.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "succesfully users added"),
@@ -56,11 +56,12 @@ public class UserController {
         @ApiResponse(code = 409, message = "User/users already on the DB."),
         @ApiResponse(code = 500, message = "Internal Server Error")
     })
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<User>> addUser(@RequestBody List<User> users) {
-        return new ResponseEntity(userRepository.saveAll(users), HttpStatus.CREATED);
+        return new ResponseEntity<>(userRepository.saveAll(users), HttpStatus.CREATED);
     }
 
-    @PostMapping("add")
+    @PostMapping("user")
     @ApiOperation(value = "given a User object, add it to our repository", response = User.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully login user"),
@@ -71,9 +72,10 @@ public class UserController {
         @ApiResponse(code = 409, message = "User is already on the DB."),
         @ApiResponse(code = 500, message = "Internal Server Error")
     })
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<User> addUser
         (@ApiParam(value = "user JSON to add it to our repo", required = true) @RequestBody User user) {
-        return new ResponseEntity(userService.insertUser(user), HttpStatus.CREATED);
+        return new ResponseEntity<>(userService.insertUser(user), HttpStatus.CREATED);
     }
 
     @GetMapping()
@@ -86,8 +88,9 @@ public class UserController {
         @ApiResponse(code = 403, message = "Access unauthorized."),
         @ApiResponse(code = 500, message = "Internal Server Error")
     })
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<User>> getAllUsers() {
-        return new ResponseEntity(userRepository.findAll(), HttpStatus.OK);
+        return new ResponseEntity<>(userRepository.findAll(), HttpStatus.OK);
     }
 
     @GetMapping("{userName}")
@@ -100,6 +103,7 @@ public class UserController {
         @ApiResponse(code = 403, message = "Access unauthorized."),
         @ApiResponse(code = 500, message = "Internal Server Error")
     })
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Optional<User>> getUserName(@PathVariable String userName){
         return new ResponseEntity(Optional.of(userService.findByUserName(userName)), HttpStatus.OK);
     }
@@ -114,12 +118,13 @@ public class UserController {
         @ApiResponse(code = 403, message = "Access unauthorized."),
         @ApiResponse(code = 500, message = "Internal Server Error")
     })
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<Book>> getBookCollections(@PathVariable String userName){
         User userFound = userService.findByUserName(userName).get();
-        return new ResponseEntity(userFound.getBooks(), HttpStatus.OK);
+        return new ResponseEntity<>(userFound.getBooks(), HttpStatus.OK);
     }
 
-    @GetMapping("find/birthdate")
+    @GetMapping("birthdate")
     @ApiOperation(value = "Given two dates, return values in between", response = User.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully collection of books response"),
@@ -129,13 +134,14 @@ public class UserController {
         @ApiResponse(code = 403, message = "Access unauthorized."),
         @ApiResponse(code = 500, message = "Internal Server Error")
     })
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<Book>> filterByDates(@RequestParam(name = "startDate") String date1,
         @RequestParam(name = "endDate") String date2) {
         return new ResponseEntity(userService.foundUserByBetweenBirthday(
             LocalDate.parse(date1), LocalDate.parse(date2)), HttpStatus.OK);
     }
 
-    @GetMapping("find/sequence")
+    @GetMapping("sequence")
     @ApiOperation(value = "Given a sequence, find by contains name, and return the user list or an exception", response = User.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully get list of user"),
@@ -146,16 +152,16 @@ public class UserController {
         @ApiResponse(code = 409, message = "User is already on the DB."),
         @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<User>> foundUserByContainsName(@RequestParam ("sequence") String sequence){
         List<User> list = userRepository.findByNameContaining(sequence);
         if (list.isEmpty()){
             new UserHttpErrors("Users not found").userNotFound();
         }
-        return new ResponseEntity(list, HttpStatus.OK);
+        return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
-    @PutMapping("update/{name}")
+    @PutMapping("{name}")
     @ApiOperation(value = "Given a name, update user", response = User.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully get list of user"),
@@ -172,7 +178,7 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "name of user object and name of the parameter didn't match");
         }
-        return new ResponseEntity(userService.updateUser(user, name), HttpStatus.OK);
+        return new ResponseEntity<>(userService.updateUser(user, name), HttpStatus.OK);
     }
 
     @PutMapping ("books")
@@ -193,10 +199,11 @@ public class UserController {
         User userFound = userService.findByUserName(userName).get();
         Book bookToAdd = bookService.findByTitle(title);
         userFound.addBook(bookToAdd);
-        return new ResponseEntity(userService.updateUser(userFound, userFound.getName()), HttpStatus.OK);
+        return new ResponseEntity<>(userService.updateUser(userFound, userFound.getName())
+            , HttpStatus.OK);
     }
 
-    @DeleteMapping("delete/{userName}")
+    @DeleteMapping("{userName}")
     @ApiOperation(value = "Given a username, delete that user and return count of users deleted", response = User.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully get list of user"),
@@ -207,14 +214,15 @@ public class UserController {
         @ApiResponse(code = 409, message = "User is already on the DB."),
         @ApiResponse(code = 500, message = "Internal Server Error")
     })
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Integer> deleteUser(@PathVariable String userName){
         if (userName.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NO_CONTENT, "parameter userName is empty");
         }
-        return new ResponseEntity(userService.deleteByUserName(userName), HttpStatus.OK);
+        return new ResponseEntity<>(userService.deleteByUserName(userName), HttpStatus.OK);
     }
 
-    @DeleteMapping("delete/books")
+    @DeleteMapping("books")
     @ApiOperation(value = "Given title of the book and username, delete book of that user's collection", response = User.class)
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "Successfully get list of user"),
@@ -225,12 +233,13 @@ public class UserController {
         @ApiResponse(code = 409, message = "User is already on the DB."),
         @ApiResponse(code = 500, message = "Internal Server Error")
     })
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<Book>> deleteBookFromCollection(@RequestParam(name="title", required = true) String title,
         @RequestParam(name="username", required = true) String userName){
         User userFound = userService.findByUserName(userName).get();
         Book bookToDelete = bookService.findByTitle(title);
         userFound.removeBook(bookToDelete);
-        return new ResponseEntity(userFound.getBooks(), HttpStatus.OK);
+        return new ResponseEntity<>(userFound.getBooks(), HttpStatus.OK);
 
     }
 }

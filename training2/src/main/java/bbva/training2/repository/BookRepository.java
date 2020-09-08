@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
 
-    Optional<Book> findByIdBook(int id);
+    Optional<Book> findByIdBook(long id);
 
     Book findByTitle(String title);
 

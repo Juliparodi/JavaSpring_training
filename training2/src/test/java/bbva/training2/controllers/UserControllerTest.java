@@ -2,6 +2,7 @@ package bbva.training2.controllers;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.mockito.Mockito.*;
@@ -25,6 +26,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import javax.swing.Spring;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,7 +82,25 @@ class UserControllerTest {
         .contentType(MediaType.APPLICATION_JSON)
             .content(mapper.writeValueAsString(jsonUser)))
             .andExpect(status().isOk())
+            .andDo(print())
             .andExpect(jsonPath("$.name", is("julianparodi")));
+    }
+
+    @Test
+    void whenFindAllUsers_thenUsersAreReturned() throws Exception {
+        JsonNode jsonUser = mapper.readValue(new File("./JsonFiles/createUsers.json"), JsonNode.class);
+        List<User> userList = Arrays.asList(new User ("julianparodi", "juli", LocalDate
+            .of(1997, 10, 01)), new User ("mati", "MatiBenitez", LocalDate
+            .of(1997, 10, 02)), new User ("lau", "LauFernandez", LocalDate
+            .of(1997, 10, 03)));
+        Mockito.when(userRepository.findAll()).thenReturn(userList);
+        String url = VariableConstants.USER_URL.concat("all");
+        mvc.perform(get(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(mapper.writeValueAsBytes(jsonUser)))
+            .andExpect(status().isOk())
+            .andDo(print())
+            .andExpect(jsonPath("$[0].userName", is("juli")));
     }
 
     @Test

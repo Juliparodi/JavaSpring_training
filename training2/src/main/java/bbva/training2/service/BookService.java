@@ -46,7 +46,7 @@ public class BookService {
 
     public Optional<Book> findById(Long id) {
         return Optional.ofNullable(
-            bookRepository.findByIdBook(Math.toIntExact(id)).orElseThrow(
+            bookRepository.findByIdBook((id)).orElseThrow(
                 () -> new BookNotFoundException("Book with given ID is not present in catalog")));
     }
 

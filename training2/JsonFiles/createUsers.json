@@ -7,13 +7,13 @@
     },
 
     {
-    "userName" : "MatiBenitez",
+        "userName" : "MatiBenitez",
     "name" : "mati",
     "birthDate" : "1997-10-02"
     },
 
     {
-    "userName" : "LauFernandez",
+        "userName" : "LauFernandez",
     "name" : "lau",
     "birthDate" : "1997-10-03"
     }

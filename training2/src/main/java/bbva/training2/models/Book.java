@@ -1,6 +1,7 @@
 package bbva.training2.models;
 
 import bbva.training2.utils.ErrorConstants;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import com.sun.istack.NotNull;
@@ -57,6 +58,7 @@ public class Book {
     private String isbn;
 
     @ManyToMany(mappedBy = "books")
+    @JsonIgnore
     private List<User> users = new ArrayList<>();
 
     public Book(String genre, String author, String image, String title,

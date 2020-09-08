@@ -19,6 +19,10 @@ public class OpenLibraryService {
     @Autowired
     private BookAdapter bookAdapter;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
+
     @Value("${openLibrary.baseUrl}")
     private String urlWithoutIsbn;
 
@@ -27,7 +31,6 @@ public class OpenLibraryService {
 
     public Book bookInfo(String isbn) {
         String param = "ISBN:" + isbn;
-        RestTemplate restTemplate = new RestTemplate();
         String uri = String.format(urlWithoutIsbn, param);
         ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
 
@@ -36,6 +39,10 @@ public class OpenLibraryService {
 
         try {
             JsonNode root = mapper.readTree(response.getBody());
+            System.out.println(response.getStatusCodeValue());
+            System.out.println(response.getHeaders());
+            System.out.println(response.getBody());
+            System.out.println(response.getStatusCode());
             return bookAdapter.transformBookDTOToBook(bookAdapter.createBookDTO(isbn, root.iterator().next()));
         } catch (JsonProcessingException e) {
             new BookHttpErrors("Book Not Found").bookNotFound();

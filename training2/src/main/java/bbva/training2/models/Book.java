@@ -1,10 +1,11 @@
 package bbva.training2.models;
 
 import bbva.training2.utils.ErrorConstants;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.google.common.base.Preconditions;
 import com.sun.istack.NotNull;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -23,6 +24,9 @@ import org.apache.commons.lang3.StringUtils;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "idBook")
 public class Book {
 
     @Id
@@ -145,9 +149,6 @@ public class Book {
         this.isbn = isbn;
     }
 
-    public List<User> getUser() {
-        return (List<User>) Collections.unmodifiableList(users);
-    }
 
     @Override
     public boolean equals(Object o) {

@@ -8,11 +8,13 @@ import bbva.training2.repository.BookRepository;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
+@Slf4j
 public class BookService {
 
     @Autowired
@@ -20,6 +22,7 @@ public class BookService {
 
     public Book findByTitle(String title) {
         if (bookRepository.findByTitle(title) == (null)) {
+            log.error("Book with title: '{}' is not present in our catalog", title);
             throw new BookNotFoundException(
                     "Book with given title is not present in our catalog");
         }
@@ -36,6 +39,7 @@ public class BookService {
     public Book insertOrUpdate(Book book) {
         List<Book> books = bookRepository.findAll();
         if (books.stream().anyMatch(x -> book.equals(x))) {
+            log.error("Book  '{}' is already in our DB", book);
             throw new BookAlreadyOwnException("Book is already in our DB");
         }
         return bookRepository.save(book);

@@ -2,7 +2,8 @@ package bbva.training2.models;
 
 import bbva.training2.exceptions.BookAlreadyOwnException;
 import bbva.training2.exceptions.BookNotFoundException;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDate;
@@ -29,6 +30,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "users")
 @ApiModel(description = "Entity to keep user objects")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "idUser")
 public class User {
 
     @Id
@@ -47,7 +51,6 @@ public class User {
 
     @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE})
     @JoinTable
-    @JsonIgnoreProperties("users")
     private List<Book> books = new ArrayList<>();
 
     public User(String name, String userName, LocalDate date) {

@@ -1,6 +1,5 @@
 package bbva.training2.controllers;
 
-import bbva.training2.exceptions.BookNotFoundException;
 import bbva.training2.external.services.OpenLibraryService;
 import bbva.training2.models.Book;
 import bbva.training2.models.User;
@@ -9,19 +8,14 @@ import bbva.training2.service.BookService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Stream;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import org.springframework.beans.TypeMismatchException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.ResponseEntity.BodyBuilder;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,11 +27,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/v1/books/")
+@Slf4j
 public class BookController {
 
     @Autowired
@@ -53,13 +47,13 @@ public class BookController {
     @PostMapping()
     @ApiOperation(value = "add a User to our repository", response = User.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = "succesfully book added"),
-        @ApiResponse(code = 404, message = "Book not found"),
-        @ApiResponse(code = 405, message = "Method Not Allowed"),
-        @ApiResponse(code = 401, message = "Access unauthorized."),
-        @ApiResponse(code = 403, message = "Access unauthorized."),
-        @ApiResponse(code = 409, message = "Book already on the DB."),
-        @ApiResponse(code = 500, message = "Internal Server Error")
+            @ApiResponse(code = 201, message = "succesfully book added"),
+            @ApiResponse(code = 404, message = "Book not found"),
+            @ApiResponse(code = 405, message = "Method Not Allowed"),
+            @ApiResponse(code = 401, message = "Access unauthorized."),
+            @ApiResponse(code = 403, message = "Access unauthorized."),
+            @ApiResponse(code = 409, message = "Book already on the DB."),
+            @ApiResponse(code = 500, message = "Internal Server Error")
     })
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Book> add(@Valid @RequestBody Book book) {
@@ -69,151 +63,164 @@ public class BookController {
     @PostMapping("all")
     @ApiOperation(value = "given a Book list, add all to our repository", response = User.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 201, message = "succesfully books added"),
-        @ApiResponse(code = 404, message = "User/users not found"),
-        @ApiResponse(code = 405, message = "Method Not Allowed"),
-        @ApiResponse(code = 401, message = "Access unauthorized."),
-        @ApiResponse(code = 403, message = "Access unauthorized."),
-        @ApiResponse(code = 409, message = "Book/books already on the DB."),
-        @ApiResponse(code = 500, message = "Internal Server Error")
+            @ApiResponse(code = 201, message = "succesfully books added"),
+            @ApiResponse(code = 404, message = "User/users not found"),
+            @ApiResponse(code = 405, message = "Method Not Allowed"),
+            @ApiResponse(code = 401, message = "Access unauthorized."),
+            @ApiResponse(code = 403, message = "Access unauthorized."),
+            @ApiResponse(code = 409, message = "Book/books already on the DB."),
+            @ApiResponse(code = 500, message = "Internal Server Error")
     })
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<Book>> addAll(@RequestBody List<Book> books){
+    public ResponseEntity<List<Book>> addAll(@RequestBody List<Book> books) {
         return new ResponseEntity<>(bookRepository.saveAll(books), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     @ApiOperation(value = "given a Book object and a given id, update Book repository", response = User.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "succesfully books updated"),
-        @ApiResponse(code = 404, message = "Book/books not found"),
-        @ApiResponse(code = 405, message = "Method Not Allowed"),
-        @ApiResponse(code = 401, message = "Access unauthorized."),
-        @ApiResponse(code = 403, message = "Access unauthorized."),
-        @ApiResponse(code = 409, message = "Book/books already on the DB."),
-        @ApiResponse(code = 500, message = "Internal Server Error")
+            @ApiResponse(code = 200, message = "succesfully books updated"),
+            @ApiResponse(code = 404, message = "Book/books not found"),
+            @ApiResponse(code = 405, message = "Method Not Allowed"),
+            @ApiResponse(code = 401, message = "Access unauthorized."),
+            @ApiResponse(code = 403, message = "Access unauthorized."),
+            @ApiResponse(code = 409, message = "Book/books already on the DB."),
+            @ApiResponse(code = 500, message = "Internal Server Error")
     })
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Optional<Book>> updateBookById(@RequestBody Book book,
-        @PathVariable long id) {
+            @PathVariable long id) {
+        log.info("----- BOOK OBJECT: '{}', ID '{}'", book, id);
         if (book.getIdBook() != id) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "ID object and ID parameter are not the same");
+            log.error("OBJECT and ID parameter are not the same");
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "ID object and ID parameter are not the same");
         } else if (!bookService.findById(id).isPresent()) {
+            log.error("ID not found");
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ID not found");
         }
         return new ResponseEntity<>(
-            Optional.of(bookService.insertOrUpdate(book)),
-            HttpStatus.OK);
+                Optional.of(bookService.insertOrUpdate(book)),
+                HttpStatus.OK);
     }
 
-//https://stackoverflow.com/questions/32269192/spring-no-entitymanager-with-actual-transaction-available-for-current-thread
+    //https://stackoverflow.com/questions/32269192/spring-no-entitymanager-with-actual-transaction-available-for-current-thread
     @Transactional //i used this annotation since i was giving NoEntityManager Exception
-   @DeleteMapping("{title}")
+    @DeleteMapping("{title}")
     @ApiOperation(value = "given a Book title. delete that book object from our DB", response = User.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "succesfully book deleted"),
-        @ApiResponse(code = 404, message = "Book/books not found"),
-        @ApiResponse(code = 405, message = "Method Not Allowed"),
-        @ApiResponse(code = 401, message = "Access unauthorized."),
-        @ApiResponse(code = 403, message = "Access unauthorized."),
-        @ApiResponse(code = 409, message = "Book/books already on the DB."),
-        @ApiResponse(code = 500, message = "Internal Server Error")
+            @ApiResponse(code = 200, message = "succesfully book deleted"),
+            @ApiResponse(code = 404, message = "Book/books not found"),
+            @ApiResponse(code = 405, message = "Method Not Allowed"),
+            @ApiResponse(code = 401, message = "Access unauthorized."),
+            @ApiResponse(code = 403, message = "Access unauthorized."),
+            @ApiResponse(code = 409, message = "Book/books already on the DB."),
+            @ApiResponse(code = 500, message = "Internal Server Error")
     })
     @ResponseStatus(HttpStatus.OK)
-   public ResponseEntity<Integer> deleteByTitle(@PathVariable String title){
-       if(bookService.findByTitle(title)==(null)){
-           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Book with given title not found");
-       }
-       return new ResponseEntity<>(bookRepository.deleteByTitle(title), HttpStatus.OK);
-   }
+    public ResponseEntity<Integer> deleteByTitle(@PathVariable String title) {
+        if (bookService.findByTitle(title) == (null)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Book with given title not found");
+        }
+        return new ResponseEntity<>(bookRepository.deleteByTitle(title), HttpStatus.OK);
+    }
 
     @GetMapping("all")
     @ApiOperation(value = "retrieve all list of books", response = User.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "succesfully list of books showed on the screen"),
-        @ApiResponse(code = 404, message = "Book/books not found"),
-        @ApiResponse(code = 405, message = "Method Not Allowed"),
-        @ApiResponse(code = 401, message = "Access unauthorized."),
-        @ApiResponse(code = 403, message = "Access unauthorized."),
-        @ApiResponse(code = 409, message = "Book/books already on the DB."),
-        @ApiResponse(code = 500, message = "Internal Server Error")
+            @ApiResponse(code = 200, message = "succesfully list of books showed on the screen"),
+            @ApiResponse(code = 404, message = "Book/books not found"),
+            @ApiResponse(code = 405, message = "Method Not Allowed"),
+            @ApiResponse(code = 401, message = "Access unauthorized."),
+            @ApiResponse(code = 403, message = "Access unauthorized."),
+            @ApiResponse(code = 409, message = "Book/books already on the DB."),
+            @ApiResponse(code = 500, message = "Internal Server Error")
     })
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<Book>> findAll() {
+        log.info("returning all books");
         return new ResponseEntity<>(bookRepository.findAll(), HttpStatus.OK);
     }
 
     @GetMapping()
     @ApiOperation(value = "given a title param, retrieve Book object that matches given title", response = User.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "succesfully book showed"),
-        @ApiResponse(code = 404, message = "Book/books not found"),
-        @ApiResponse(code = 405, message = "Method Not Allowed"),
-        @ApiResponse(code = 401, message = "Access unauthorized."),
-        @ApiResponse(code = 403, message = "Access unauthorized."),
-        @ApiResponse(code = 409, message = "Book/books already on the DB."),
-        @ApiResponse(code = 500, message = "Internal Server Error")
+            @ApiResponse(code = 200, message = "succesfully book showed"),
+            @ApiResponse(code = 404, message = "Book/books not found"),
+            @ApiResponse(code = 405, message = "Method Not Allowed"),
+            @ApiResponse(code = 401, message = "Access unauthorized."),
+            @ApiResponse(code = 403, message = "Access unauthorized."),
+            @ApiResponse(code = 409, message = "Book/books already on the DB."),
+            @ApiResponse(code = 500, message = "Internal Server Error")
     })
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Book> findByTitle(@RequestParam(value = "title") String title) {
-            return new ResponseEntity(Optional.of(bookService.findByTitle(title))
+        log.info("---- title: '{}'", title);
+        return new ResponseEntity(Optional.of(bookService.findByTitle(title))
                 , HttpStatus.OK);
-        }
+    }
 
-   @GetMapping("{isbn}")
-   @ApiOperation(value = "given a isbn of a book, retrieve from our local DB or from external service", response = User.class)
-   @ApiResponses(value = {
-       @ApiResponse(code = 200, message = "succesfully book showed"),
-       @ApiResponse(code = 404, message = "Book/books not found"),
-       @ApiResponse(code = 405, message = "Method Not Allowed"),
-       @ApiResponse(code = 401, message = "Access unauthorized."),
-       @ApiResponse(code = 403, message = "Access unauthorized."),
-       @ApiResponse(code = 409, message = "Book/books already on the DB."),
-       @ApiResponse(code = 500, message = "Internal Server Error")
-   })
-   @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Book> findByIsbn(@PathVariable String isbn){
-        return new ResponseEntity<>(bookService.findByIsbn(isbn, openLibraryService), HttpStatus.OK);
-   }
+    @GetMapping("{isbn}")
+    @ApiOperation(value = "given a isbn of a book, retrieve from our local DB or from external service", response = User.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "succesfully book showed"),
+            @ApiResponse(code = 404, message = "Book/books not found"),
+            @ApiResponse(code = 405, message = "Method Not Allowed"),
+            @ApiResponse(code = 401, message = "Access unauthorized."),
+            @ApiResponse(code = 403, message = "Access unauthorized."),
+            @ApiResponse(code = 409, message = "Book/books already on the DB."),
+            @ApiResponse(code = 500, message = "Internal Server Error")
+    })
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Book> findByIsbn(@PathVariable String isbn) {
+        log.info("-------- isbn: '{}'", isbn);
+        return new ResponseEntity<>(bookService.findByIsbn(isbn, openLibraryService),
+                HttpStatus.OK);
+    }
 
     @GetMapping("/query")
     @ApiOperation(value = "given a isbn, execute SQL query", response = User.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "succesfully book showed"),
-        @ApiResponse(code = 404, message = "Book/books not found"),
-        @ApiResponse(code = 405, message = "Method Not Allowed"),
-        @ApiResponse(code = 401, message = "Access unauthorized."),
-        @ApiResponse(code = 403, message = "Access unauthorized."),
-        @ApiResponse(code = 409, message = "Book/books already on the DB."),
-        @ApiResponse(code = 500, message = "Internal Server Error")
+            @ApiResponse(code = 200, message = "succesfully book showed"),
+            @ApiResponse(code = 404, message = "Book/books not found"),
+            @ApiResponse(code = 405, message = "Method Not Allowed"),
+            @ApiResponse(code = 401, message = "Access unauthorized."),
+            @ApiResponse(code = 403, message = "Access unauthorized."),
+            @ApiResponse(code = 409, message = "Book/books already on the DB."),
+            @ApiResponse(code = 500, message = "Internal Server Error")
     })
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Book> getBooksCustomerQuery(@RequestParam ("isbn") String isbn){
+    public ResponseEntity<Book> getBooksCustomerQuery(@RequestParam("isbn") String isbn) {
+        log.info("-------- isbn: '{}'", isbn);
         return new ResponseEntity<>(bookRepository.getBooksCustomQuery(isbn), HttpStatus.OK);
     }
 
     @GetMapping("customQuery")
     @ApiOperation(value = "given a some parameters, execute customer SQL query", response = User.class)
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "succesfully list of books showed"),
-        @ApiResponse(code = 404, message = "Book/books not found"),
-        @ApiResponse(code = 405, message = "Method Not Allowed"),
-        @ApiResponse(code = 401, message = "Access unauthorized."),
-        @ApiResponse(code = 403, message = "Access unauthorized."),
-        @ApiResponse(code = 409, message = "Book/books already on the DB."),
-        @ApiResponse(code = 500, message = "Internal Server Error")
+            @ApiResponse(code = 200, message = "succesfully list of books showed"),
+            @ApiResponse(code = 404, message = "Book/books not found"),
+            @ApiResponse(code = 405, message = "Method Not Allowed"),
+            @ApiResponse(code = 401, message = "Access unauthorized."),
+            @ApiResponse(code = 403, message = "Access unauthorized."),
+            @ApiResponse(code = 409, message = "Book/books already on the DB."),
+            @ApiResponse(code = 500, message = "Internal Server Error")
     })
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<Book>> findByQuery(
-        @RequestParam(name = "genre", required = false) String genre,
-        @RequestParam(name = "publisher", required = false) String publisher,
-        @RequestParam(name = "year", required = false) String year) {
+            @RequestParam(name = "genre", required = false) String genre,
+            @RequestParam(name = "publisher", required = false) String publisher,
+            @RequestParam(name = "year", required = false) String year) {
+        log.info("---- genre: '{}', publisher: '{}', year: '{}'", genre, publisher, year);
         return new ResponseEntity<>(bookService.getByFilterQuery(genre, publisher, year),
-            HttpStatus.OK);
+                HttpStatus.OK);
     }
 
     @GetMapping("/greeting")
-    public String greeting(@RequestParam(name="name", required=false, defaultValue="World") String name, Model model) {
+    public String greeting(
+            @RequestParam(name = "name", required = false, defaultValue = "World") String name,
+            Model model) {
         model.addAttribute("name", name);
         return "greeting.html";
     }

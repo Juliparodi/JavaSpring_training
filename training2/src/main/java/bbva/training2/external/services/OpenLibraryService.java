@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.NoSuchElementException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
+@Slf4j
 public class OpenLibraryService {
+
     @Autowired
     private BookAdapter bookAdapter;
 
@@ -26,7 +29,7 @@ public class OpenLibraryService {
     @Value("${openLibrary.baseUrl}")
     private String urlWithoutIsbn;
 
-    public OpenLibraryService(){
+    public OpenLibraryService() {
     }
 
     public Book bookInfo(String isbn) {
@@ -43,12 +46,17 @@ public class OpenLibraryService {
             System.out.println(response.getHeaders());
             System.out.println(response.getBody());
             System.out.println(response.getStatusCode());
-            return bookAdapter.transformBookDTOToBook(bookAdapter.createBookDTO(isbn, root.iterator().next()));
+            return bookAdapter.transformBookDTOToBook(
+                    bookAdapter.createBookDTO(isbn, root.iterator().next()));
         } catch (JsonProcessingException e) {
+            log.error("JsonProccessingException: ", e.getMessage());
             new BookHttpErrors("Book Not Found").bookNotFound();
-        }
-        catch (NoSuchElementException e){
+        } catch (NoSuchElementException e) {
+            log.error("NoSuchElementException: ", e.getMessage());
             new BookHttpErrors("Book not found").bookNotFound();
+        } catch (NullPointerException e) {
+            log.error("NullPointerException: ", e.getMessage());
+            throw new NullPointerException("I don't know");
         }
         return null;
     }

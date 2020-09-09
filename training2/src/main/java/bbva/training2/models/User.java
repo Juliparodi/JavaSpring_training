@@ -2,6 +2,7 @@ package bbva.training2.models;
 
 import bbva.training2.exceptions.BookAlreadyOwnException;
 import bbva.training2.exceptions.BookNotFoundException;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDate;
@@ -9,17 +10,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import javax.annotation.CheckForNull;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -49,6 +47,7 @@ public class User {
 
     @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE})
     @JoinTable
+    @JsonIgnoreProperties("users")
     private List<Book> books = new ArrayList<>();
 
     public User(String name, String userName, LocalDate date) {
@@ -73,15 +72,15 @@ public class User {
         return (List<Book>) Collections.unmodifiableList(books);
     }
 
-    public boolean addBook(Book book){
-        if (this.getBooks().contains(book)){
+    public boolean addBook(Book book) {
+        if (this.getBooks().contains(book)) {
             throw new BookAlreadyOwnException("User has already added this book");
         }
         return books.add(book);
     }
 
-    public boolean removeBook(Book book){
-        if (!this.getBooks().contains(book)){
+    public boolean removeBook(Book book) {
+        if (!this.getBooks().contains(book)) {
             throw new BookNotFoundException("Book is not in our user list");
         }
         return books.remove(book);
@@ -91,7 +90,7 @@ public class User {
     public boolean equals(Object o) {
         User user = (User) o;
         return Objects.equals(userName, user.userName) &&
-            Objects.equals(name, user.name);
+                Objects.equals(name, user.name);
     }
 
     @Override

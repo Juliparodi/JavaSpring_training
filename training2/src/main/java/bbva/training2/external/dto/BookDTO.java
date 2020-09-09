@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookDTO implements Serializable {
 
+    private static final long serialVersionUID = 1234567L;
+
     @NotNull
     private String isbn;
     @NotNull
@@ -20,7 +22,8 @@ public class BookDTO implements Serializable {
     @NotNull
     private String authors;
 
-    public BookDTO (String isbn, String title, String subtitle, String publishers, String publishDate, Integer numberPages, String authors){
+    public BookDTO(String isbn, String title, String subtitle, String publishers,
+            String publishDate, Integer numberPages, String authors) {
         this.setIsbn(isbn);
         this.setTitle(title);
         this.setSubtitle(subtitle);

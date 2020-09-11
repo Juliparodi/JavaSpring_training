@@ -1,11 +1,10 @@
 package bbva.training2.adapters;
 
-import bbva.training2.external.dto.BookDTO;
+import bbva.training2.external.OpenAPI.dto.BookDTO;
 import bbva.training2.models.Book;
 import bbva.training2.repository.BookRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,33 +19,38 @@ public class BookAdapter {
         bookDTO.setIsbn(isbn);
         bookDTO.setTitle(request.path("title").textValue());
         bookDTO.setSubtitle(request.path("subtitle").textValue());
-        bookDTO.setPublishers(convertJsonPublisherNodeToString(request.path("publishers")));
+        // bookDTO.setPublishers(convertJsonPublisherNodeToString(request.path("publishers")));
         bookDTO.setPublishDate(request.path("publish_date").textValue());
         bookDTO.setNumberPages(request.path("number_of_pages").intValue());
-        bookDTO.setAuthors(convertJsonAuthorNodeToString(request.path("authors")));
+        // bookDTO.setAuthors(convertJsonAuthorNodeToString(request.path("authors")));
         return bookDTO;
     }
 
     private String convertJsonPublisherNodeToString(JsonNode publishersNode) {
         AtomicReference<String> publishers = new AtomicReference<>("");
         publishersNode.forEach(publisherNode -> publishers
-            .set(publishers.get().concat(publisherNode.path("name").textValue().concat(", "))));
+                .set(publishers.get().concat(publisherNode.path("name").textValue().concat(", "))));
         return publishers.get().substring(0, publishers.get().length() - 2);
     }
 
-    private String convertJsonAuthorNodeToString(JsonNode authorsNode) {
+    private String[] convertJsonAuthorNodeToString(JsonNode authorsNode) {
         AtomicReference<String> authors = new AtomicReference<>("");
         authorsNode.forEach(x -> authors
-            .set(authors.get().concat(x.path("name").textValue().concat(", "))));
-        return authors.get().substring(0, authors.get().length() - 2);
+                .set(authors.get().concat(x.path("name").textValue().concat(", "))));
+        return new String[]{authors.get().substring(0, authors.get().length() - 2)};
     }
 
-    public Book transformBookDTOToBook(@Valid BookDTO bookDTO) {
-        String author = String.join("", bookDTO.getAuthors());
+    public Book transformBookDTOToBook(BookDTO bookDTO, String isbn) {
+        String author = bookDTO.getAuthors().get(0).toString().substring(13).replace(")", " ")
+                .trim();
+        String publishers =
+                (bookDTO.getPublishers().get(0) == null || bookDTO.getPublishers().get(0)
+                        .toString().isEmpty()) ? "No publishers"
+                        : bookDTO.getPublishers().get(0).toString().substring(16).replace(")", " ")
+                                .trim();
         Book book = new Book("null", author, "null", bookDTO.getTitle(), bookDTO.getSubtitle(),
-            bookDTO.getPublishers(), bookDTO.getPublishDate(), bookDTO.getNumberPages(),
-            bookDTO.getIsbn());
-       return bookRepository.save(book);
+                publishers.toString(), bookDTO.getPublishDate(), bookDTO.getNumberPages(), isbn);
+        return bookRepository.save(book);
     }
 }
 
@@ -60,5 +64,7 @@ public class BookAdapter {
         });
         return list;
     }
-     */
+
+      */
+
 

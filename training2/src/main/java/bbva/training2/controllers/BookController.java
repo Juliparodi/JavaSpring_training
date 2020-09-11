@@ -1,6 +1,6 @@
 package bbva.training2.controllers;
 
-import bbva.training2.external.services.OpenLibraryService;
+import bbva.training2.external.OpenAPI.services.OpenLibraryService;
 import bbva.training2.models.Book;
 import bbva.training2.models.User;
 import bbva.training2.repository.BookRepository;
@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -43,8 +42,7 @@ public class BookController {
     @Autowired
     private OpenLibraryService openLibraryService;
 
-
-    @PostMapping()
+    @PostMapping
     @ApiOperation(value = "add a User to our repository", response = User.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "succesfully book added"),
@@ -55,7 +53,6 @@ public class BookController {
             @ApiResponse(code = 409, message = "Book already on the DB."),
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Book> add(@Valid @RequestBody Book book) {
         return new ResponseEntity<>(bookService.insertOrUpdate(book), HttpStatus.CREATED);
     }
@@ -71,12 +68,11 @@ public class BookController {
             @ApiResponse(code = 409, message = "Book/books already on the DB."),
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<Book>> addAll(@RequestBody List<Book> books) {
         return new ResponseEntity<>(bookRepository.saveAll(books), HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{idBook}")
     @ApiOperation(value = "given a Book object and a given id, update Book repository", response = User.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "succesfully books updated"),
@@ -87,20 +83,19 @@ public class BookController {
             @ApiResponse(code = 409, message = "Book/books already on the DB."),
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Optional<Book>> updateBookById(@RequestBody Book book,
-            @PathVariable long id) {
-        log.info("----- BOOK OBJECT: '{}', ID '{}'", book, id);
-        if (book.getIdBook() != id) {
+            @PathVariable long idBook) {
+        log.info("----- BOOK OBJECT: '{}', ID '{}'", book, idBook);
+        if (book.getIdBook() != idBook) {
             log.error("OBJECT and ID parameter are not the same");
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "ID object and ID parameter are not the same");
-        } else if (!bookService.findById(id).isPresent()) {
+        } else if (!bookService.findById(idBook).isPresent()) {
             log.error("ID not found");
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ID not found");
         }
         return new ResponseEntity<>(
-                Optional.of(bookService.insertOrUpdate(book)),
+                Optional.of(bookService.updateById(book, idBook)),
                 HttpStatus.OK);
     }
 
@@ -117,7 +112,6 @@ public class BookController {
             @ApiResponse(code = 409, message = "Book/books already on the DB."),
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Integer> deleteByTitle(@PathVariable String title) {
         if (bookService.findByTitle(title) == (null)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -137,7 +131,6 @@ public class BookController {
             @ApiResponse(code = 409, message = "Book/books already on the DB."),
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<Book>> findAll() {
         log.info("returning all books");
         return new ResponseEntity<>(bookRepository.findAll(), HttpStatus.OK);
@@ -154,14 +147,13 @@ public class BookController {
             @ApiResponse(code = 409, message = "Book/books already on the DB."),
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Book> findByTitle(@RequestParam(value = "title") String title) {
         log.info("---- title: '{}'", title);
         return new ResponseEntity(Optional.of(bookService.findByTitle(title))
                 , HttpStatus.OK);
     }
 
-    @GetMapping("{isbn}")
+    @GetMapping("{isbn}") //0765304368
     @ApiOperation(value = "given a isbn of a book, retrieve from our local DB or from external service", response = User.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "succesfully book showed"),
@@ -172,8 +164,7 @@ public class BookController {
             @ApiResponse(code = 409, message = "Book/books already on the DB."),
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<Book> findByIsbn(@PathVariable String isbn) {
+    public ResponseEntity<Book> findByIsbn(@PathVariable String isbn) throws Exception {
         log.info("-------- isbn: '{}'", isbn);
         return new ResponseEntity<>(bookService.findByIsbn(isbn, openLibraryService),
                 HttpStatus.OK);
@@ -190,7 +181,6 @@ public class BookController {
             @ApiResponse(code = 409, message = "Book/books already on the DB."),
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<Book> getBooksCustomerQuery(@RequestParam("isbn") String isbn) {
         log.info("-------- isbn: '{}'", isbn);
         return new ResponseEntity<>(bookRepository.getBooksCustomQuery(isbn), HttpStatus.OK);
@@ -207,7 +197,6 @@ public class BookController {
             @ApiResponse(code = 409, message = "Book/books already on the DB."),
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<Book>> findByQuery(
             @RequestParam(name = "genre", required = false) String genre,
             @RequestParam(name = "publisher", required = false) String publisher,

@@ -1,8 +1,8 @@
 package bbva.training2.external.services;
 
-import bbva.training2.adapters.BookAdapter;
+import bbva.training2.adapters.PublicApiAdapter;
 import bbva.training2.exceptions.errors.BookHttpErrors;
-import bbva.training2.models.Book;
+import bbva.training2.external.dto.PublicApiDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,46 +17,39 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @Slf4j
-public class OpenLibraryService {
+public class PublicApisService {
 
-    @Autowired
-    private BookAdapter bookAdapter;
-
-    @Autowired
-    private RestTemplate restTemplate;
-
-
-    @Value("${openLibrary.baseUrl}")
+    @Value("${publicapis.org}")
     private String urlWithoutIsbn;
 
-    public OpenLibraryService() {
+    @Autowired
+    private PublicApiAdapter publicApiAdapter;
+
+    public PublicApisService() {
     }
 
-    public Book bookInfo(String isbn) {
-        String param = "ISBN:" + isbn;
-        String uri = String.format(urlWithoutIsbn, param);
-        ResponseEntity<String> response = restTemplate.getForEntity(uri, String.class);
+    public PublicApiDTO publicApiInfo(String param) {
+        String url = urlWithoutIsbn.concat(param);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         try {
             JsonNode root = mapper.readTree(response.getBody());
-            System.out.println(response.getStatusCodeValue());
-            System.out.println(response.getHeaders());
-            System.out.println(response.getBody());
-            System.out.println(response.getStatusCode());
-            return bookAdapter.transformBookDTOToBook(
-                    bookAdapter.createBookDTO(isbn, root.iterator().next()));
+            log.info(String.valueOf(response.getStatusCodeValue()));
+            log.info(String.valueOf(response.getHeaders()));
+            log.info(response.getBody());
+            log.info(String.valueOf(response.getStatusCode()));
+            return publicApiAdapter.createApiDTO(root.iterator().next());
         } catch (JsonProcessingException e) {
             log.error("JsonProccessingException: ", e.getMessage());
             new BookHttpErrors("Book Not Found").bookNotFound();
         } catch (NoSuchElementException e) {
             log.error("NoSuchElementException: ", e.getMessage());
             new BookHttpErrors("Book not found").bookNotFound();
-        } catch (NullPointerException e) {
-            log.error("NullPointerException: ", e.getMessage());
-            throw new NullPointerException("I don't know");
         }
         return null;
     }

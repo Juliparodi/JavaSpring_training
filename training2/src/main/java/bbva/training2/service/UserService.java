@@ -1,17 +1,12 @@
 package bbva.training2.service;
 
-import bbva.training2.exceptions.BookAlreadyOwnException;
-import bbva.training2.exceptions.BookNotFoundException;
 import bbva.training2.exceptions.UserAlreadyOwnException;
 import bbva.training2.exceptions.errors.UserHttpErrors;
-import bbva.training2.models.Book;
 import bbva.training2.models.User;
-
 import bbva.training2.repository.UserRepository;
 import io.swagger.annotations.ApiOperation;
 import java.time.LocalDate;
 import java.util.List;
-
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
@@ -34,7 +29,8 @@ public class UserService {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Optional<User> findByUserName(String userName) {
         if (!userRepository.findByUserName(userName).isPresent()) {
-            new UserHttpErrors("user with given UserName doesn't exist in our database").userNotFound();
+            new UserHttpErrors("user with given UserName doesn't exist in our database")
+                    .userNotFound();
         }
         return userRepository.findByUserName(userName);
     }
@@ -43,7 +39,7 @@ public class UserService {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public User insertUser(User user) {
         users = userRepository.findAll();
-        if (users.stream().anyMatch(x -> user.equals(x))){
+        if (users.stream().anyMatch(x -> user.equals(x))) {
             throw new UserAlreadyOwnException("User is already in our DB");
         }
         return userRepository.save(user);
@@ -54,7 +50,7 @@ public class UserService {
     public Integer deleteByUserName(String userName) {
         users = userRepository.findAll();
         if (!userRepository.findByUserName(userName).isPresent()) {
-           new UserHttpErrors("User is not in our DB").userNotFound();
+            new UserHttpErrors("User is not in our DB").userNotFound();
         }
         return userRepository.deleteByUserName(userName);
     }
@@ -64,7 +60,7 @@ public class UserService {
     public User updateUser(User user, String name) {
         if (!userRepository.findByName(name).isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                "cannot update user with that name since is not in our DB");
+                    "cannot update user with that name since is not in our DB");
         }
         User userToUpdate = userRepository.findByName(name).get();
         userToUpdate.setUserName(user.getUserName());
@@ -75,7 +71,7 @@ public class UserService {
 
     public List<User> foundUserByBetweenBirthday(LocalDate date1, LocalDate date2) {
         return userRepository.findAll().stream()
-            .filter(x -> x.getBirthDate().isAfter(date1) && x.getBirthDate().isBefore(date2))
-            .collect(Collectors.toList());
+                .filter(x -> x.getBirthDate().isAfter(date1) && x.getBirthDate().isBefore(date2))
+                .collect(Collectors.toList());
     }
 }

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
 
@@ -25,9 +24,9 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     Book findByGenre(String genre);
 
     @Query(value = "SELECT b FROM Book b "
-        + "WHERE "
-        + "(:publisher is null OR b.publisher = :publisher) AND "
-        + "(:genre is null OR b.genre = :genre) AND "
-        + "(:year is null OR b.year = :year)")
+            + "WHERE "
+            + "(:publisher is null OR b.publisher = :publisher) AND "
+            + "(:genre is null OR b.genre = :genre) AND "
+            + "(:year is null OR b.year = :year)")
     List<Book> getByFilterQuery(String genre, String publisher, String year);
 }

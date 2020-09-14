@@ -26,6 +26,34 @@ public class OpenLibraryService {
 
     public OpenLibraryService() {
     }
+
+    public Book bookInfo(String isbn) throws Exception {
+        String param = "ISBN:" + isbn;
+        String uri = String.format(urlWithoutIsbn, param);
+        RestTemplate restTemplate = new RestTemplate();
+        ParameterizedTypeReference<Map<String, BookDTO>> parameterizedTypeReference = new ParameterizedTypeReference<Map<String, BookDTO>>() {
+        };
+
+        try {
+            Map<String, BookDTO> response = restTemplate.exchange(uri, HttpMethod.GET, null,
+                    parameterizedTypeReference, isbn).getBody();
+            BookDTO bookDTO = (response.get("ISBN:" + isbn));
+            log.info("---- All: '{}'", bookDTO.toString());
+            return bookAdapter.transformBookDTOToBook(bookDTO, isbn);
+        } catch (NoSuchElementException e) {
+            log.error("NoSuchElementException: ", e.getMessage());
+            new BookHttpErrors("Book not found").bookNotFound();
+        } catch (NullPointerException e) {
+            log.error("NullPointerException: ", e.getMessage());
+            throw new NullPointerException(e.getMessage());
+        } catch (Exception ex) {
+            log.error("--- unexpected exception: '{}'", ex.getMessage());
+            throw new Exception("Unexpected exception", ex.fillInStackTrace());
+        }
+        return null;
+    }
+}
+
 /*
     public Book bookInfo(String isbn) {
         String param = "ISBN:" + isbn;
@@ -60,33 +88,6 @@ public class OpenLibraryService {
 
  */
 
-
-    public Book bookInfo(String isbn) throws Exception {
-        String param = "ISBN:" + isbn;
-        String uri = String.format(urlWithoutIsbn, param);
-        RestTemplate restTemplate = new RestTemplate();
-        ParameterizedTypeReference<Map<String, BookDTO>> parameterizedTypeReference = new ParameterizedTypeReference<Map<String, BookDTO>>() {
-        };
-
-        try {
-            Map<String, BookDTO> response = restTemplate.exchange(uri, HttpMethod.GET, null,
-                    parameterizedTypeReference, isbn).getBody();
-            BookDTO bookDTO = (response.get("ISBN:" + isbn));
-            log.info("---- All: '{}'", bookDTO.toString());
-            return bookAdapter.transformBookDTOToBook(bookDTO, isbn);
-        } catch (NoSuchElementException e) {
-            log.error("NoSuchElementException: ", e.getMessage());
-            new BookHttpErrors("Book not found").bookNotFound();
-        } catch (NullPointerException e) {
-            log.error("NullPointerException: ", e.getMessage());
-            throw new NullPointerException(e.getMessage());
-        } catch (Exception ex) {
-            log.error("--- unexpected exception: '{}'", ex.getMessage());
-            throw new Exception("Unexpected exception", ex.fillInStackTrace());
-        }
-        return null;
-    }
-}
 
 
 

@@ -1,6 +1,7 @@
-package bbva.training2.external.dto;
+package bbva.training2.external.PublicApi.dto;
 
 import java.io.Serializable;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class PublicApiDTO implements Serializable {
 
     private Integer count;
-    private Entries[] entries;
+    private List<Entries> entries;
 }

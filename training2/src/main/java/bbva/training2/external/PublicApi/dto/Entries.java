@@ -1,5 +1,6 @@
-package bbva.training2.external.dto;
+package bbva.training2.external.PublicApi.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,25 +10,38 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Entries {
 
-    private String Description;
+    @JsonProperty("Description")
+    private String description;
 
-    private String Category;
+    @JsonProperty("Category")
+    private String category;
 
-    private String HTTPS;
+    @JsonProperty("HTTPS")
+    private String https;
 
-    private Boolean Auth;
+    @JsonProperty("Auth")
+    private String auth;
 
-    private String API;
+    @JsonProperty("API")
+    private String api;
 
-    private String Cors;
+    @JsonProperty("Cors")
+    private String cors;
 
-    private String Link;
+    @JsonProperty("Link")
+    private String link;
 
     @Override
     public String toString() {
-        return "ClassPojo [Description = " + Description + ", Category = " + Category + ", HTTPS = "
-                + HTTPS + ", Auth = " + Auth + ", API = " + API + ", Cors = " + Cors + ", Link = "
-                + Link + "]";
+        return "Entries{" +
+                "description='" + description + '\'' +
+                ", category='" + category + '\'' +
+                ", https='" + https + '\'' +
+                ", auth=" + auth +
+                ", api='" + api + '\'' +
+                ", cors='" + cors + '\'' +
+                ", link='" + link + '\'' +
+                '}';
     }
-
 }
+

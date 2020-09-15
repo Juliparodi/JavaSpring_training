@@ -82,7 +82,7 @@ public class Book {
     }
 
     public void setGenre(String genre) {
-        Preconditions.checkNotNull(genre, String.format(ErrorConstants.NOT_NULL, genre));
+        //Preconditions.checkNotNull(genre, String.format(ErrorConstants.NOT_NULL, genre));
         Preconditions
                 .checkArgument(!genre.isEmpty(), String.format(ErrorConstants.NOT_EMPTY, genre));
         this.genre = genre;
@@ -96,7 +96,7 @@ public class Book {
     }
 
     public void setImage(String image) {
-        Preconditions.checkNotNull(image, String.format(ErrorConstants.NOT_NULL, image));
+        // Preconditions.checkNotNull(image, String.format(ErrorConstants.NOT_NULL, image));
         Preconditions
                 .checkArgument(!image.isEmpty(), String.format(ErrorConstants.NOT_EMPTY, image));
         this.image = image;
@@ -110,12 +110,16 @@ public class Book {
     }
 
     public void setSubtitle(String subtitle) {
-        Preconditions.checkNotNull(subtitle, String.format(ErrorConstants.NOT_NULL, subtitle));
+        /*
+         Preconditions.checkNotNull(subtitle, String.format(ErrorConstants.NOT_NULL, subtitle));
         Preconditions
                 .checkArgument(!subtitle.isEmpty(),
                         String.format(ErrorConstants.NOT_EMPTY, subtitle));
+
+         */
         this.subtitle = subtitle;
     }
+
 
     public void setPublisher(String publisher) {
         Preconditions.checkNotNull(publisher, String.format(ErrorConstants.NOT_NULL, publisher));

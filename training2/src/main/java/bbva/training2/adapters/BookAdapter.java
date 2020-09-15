@@ -49,7 +49,7 @@ public class BookAdapter {
                         : bookDTO.getPublishers().get(0).toString().substring(16).replace(")", " ")
                                 .trim();
         Book book = new Book("null", author, "null", bookDTO.getTitle(), bookDTO.getSubtitle(),
-                publishers.toString(), bookDTO.getPublishDate(), bookDTO.getNumberPages(), isbn);
+                publishers, bookDTO.getPublishDate(), bookDTO.getNumberPages(), isbn);
         return bookRepository.save(book);
     }
 }

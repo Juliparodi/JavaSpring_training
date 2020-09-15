@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -34,7 +36,17 @@ public class APIsController {
     }
 
     @GetMapping("JsonPlaceHolder")
-    public ResponseEntity<List<Example>> getExample() throws Exception {
+    public ResponseEntity<List<Example>> getExample() {
         return new ResponseEntity(jsonPlaceHolderService.getExample(), HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<Example> postExample(@RequestBody Example example) {
+        Example example1 = new Example();
+        example1.setUserId(example.getUserId());
+        example1.setTitle(example.getTitle());
+        example1.setBody(example.getBody());
+        return new ResponseEntity<Example>(jsonPlaceHolderService.postExample(example1),
+                HttpStatus.CREATED);
     }
 }

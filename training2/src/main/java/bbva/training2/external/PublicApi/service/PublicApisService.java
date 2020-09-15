@@ -1,9 +1,10 @@
 package bbva.training2.external.PublicApi.service;
 
 import bbva.training2.adapters.PublicApiAdapter;
+import bbva.training2.exceptions.PublicApiServiceException;
 import bbva.training2.external.PublicApi.dto.PublicApiDTO;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,7 +22,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 public class PublicApisService {
 
-    @Value("${publicapis.org}")
+    @Value("${public_apis_org}")
     private String urlWithoutIsbn;
 
     @Autowired
@@ -29,7 +31,7 @@ public class PublicApisService {
     public PublicApisService() {
     }
 
-    public PublicApiDTO publicApiInfo(String param) throws Exception {
+    public PublicApiDTO publicApiInfo(String param) {
         String url = urlWithoutIsbn.concat(param);
 
         RestTemplate restTemplate = new RestTemplate();
@@ -38,29 +40,31 @@ public class PublicApisService {
 
         //headers
         HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        headers.set("X-COM-PERSIST", "NO");
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("X-COM-LOCATION", "BA");
-        headers.setAcceptCharset(Arrays.asList(StandardCharsets.UTF_8)); //ask Lean charset=UTF-8
+        headers.setAcceptCharset(
+                Collections.singletonList(StandardCharsets.UTF_8)); //ask Lean charset=UTF-8
 
         HttpEntity<String> entity = new HttpEntity<String>(headers);
 
         try {
-            PublicApiDTO response = restTemplate
+            ResponseEntity<PublicApiDTO> response = restTemplate
                     .exchange(url, HttpMethod.GET, entity,
-                            parameterizedTypeReference).getBody();
+                            parameterizedTypeReference);
 
             log.info("---- All: '{}'", response.toString());
             log.info("----- HEADERS: '{}'", entity.getHeaders());
-            return response;
+            log.info("---- STATUS CODE: {}", response.getStatusCode());
+            return response.getBody();
         } catch (NoSuchElementException e) {
-            log.error("NoSuchElementException: ", e.getMessage());
+            log.error("NoSuchElementException: {}", e.getMessage());
             throw new NoSuchElementException("There is no element to display");
         } catch (NullPointerException e) {
-            log.error("NullPointerException ", e.getMessage());
+            log.error("NullPointerException {}", e.getMessage());
         } catch (Exception e) {
-            log.error("Exception", e.getMessage());
-            throw new Exception(e.getMessage());
+            log.error("Exception {}", e.getMessage());
+            throw new PublicApiServiceException("Public Api service error integrating with URL", e);
         }
         return null;
     }

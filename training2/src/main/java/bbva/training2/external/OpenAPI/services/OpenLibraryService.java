@@ -1,6 +1,8 @@
 package bbva.training2.external.OpenAPI.services;
 
 import bbva.training2.adapters.BookAdapter;
+import bbva.training2.exceptions.NullOpenLibraryServiceException;
+import bbva.training2.exceptions.OpenLibraryServiceException;
 import bbva.training2.exceptions.errors.BookHttpErrors;
 import bbva.training2.external.OpenAPI.dto.BookDTO;
 import bbva.training2.models.Book;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,13 +24,13 @@ public class OpenLibraryService {
     @Autowired
     private BookAdapter bookAdapter;
 
-    @Value("${openLibrary.baseUrl}")
+    @Value("${open_library_baseUrl}")
     private String urlWithoutIsbn;
 
     public OpenLibraryService() {
     }
 
-    public Book bookInfo(String isbn) throws Exception {
+    public Book bookInfo(String isbn) {
         String param = "ISBN:" + isbn;
         String uri = String.format(urlWithoutIsbn, param);
         RestTemplate restTemplate = new RestTemplate();
@@ -35,20 +38,24 @@ public class OpenLibraryService {
         };
 
         try {
-            Map<String, BookDTO> response = restTemplate.exchange(uri, HttpMethod.GET, null,
-                    parameterizedTypeReference, isbn).getBody();
-            BookDTO bookDTO = (response.get("ISBN:" + isbn));
+            ResponseEntity<Map<String, BookDTO>> response = restTemplate
+                    .exchange(uri, HttpMethod.GET, null,
+                            parameterizedTypeReference, isbn);
+            BookDTO bookDTO = (response.getBody().get(("ISBN:" + isbn)));
             log.info("---- All: '{}'", bookDTO.toString());
+            log.info("---- STATUS CODE: {}", response.getStatusCode());
+            log.info("---- HEADERS: {}", response.getHeaders());
             return bookAdapter.transformBookDTOToBook(bookDTO, isbn);
         } catch (NoSuchElementException e) {
-            log.error("NoSuchElementException: ", e.getMessage());
+            log.error("NoSuchElementException: {}", e.getMessage());
             new BookHttpErrors("Book not found").bookNotFound();
         } catch (NullPointerException e) {
-            log.error("NullPointerException: ", e.getMessage());
-            throw new NullPointerException(e.getMessage());
+            log.error("NullPointerException: '{}' ", e.getMessage());
+            throw new NullOpenLibraryServiceException("Custom null exception", e);
         } catch (Exception ex) {
             log.error("--- unexpected exception: '{}'", ex.getMessage());
-            throw new Exception("Unexpected exception", ex.fillInStackTrace());
+            throw new OpenLibraryServiceException(
+                    "there was an error with OpenLibraryService integration", ex);
         }
         return null;
     }

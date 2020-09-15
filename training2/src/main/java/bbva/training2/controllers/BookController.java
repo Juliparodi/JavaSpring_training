@@ -164,7 +164,7 @@ public class BookController {
             @ApiResponse(code = 409, message = "Book/books already on the DB."),
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    public ResponseEntity<Book> findByIsbn(@PathVariable String isbn) throws Exception {
+    public ResponseEntity<Book> findByIsbn(@PathVariable String isbn) {
         log.info("-------- isbn: '{}'", isbn);
         return new ResponseEntity<>(bookService.findByIsbn(isbn, openLibraryService),
                 HttpStatus.OK);

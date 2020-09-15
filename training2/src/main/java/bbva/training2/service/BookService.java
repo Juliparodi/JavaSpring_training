@@ -34,7 +34,7 @@ public class BookService {
 
     //implementing cache
     @Cacheable(cacheNames = "isbn")
-    public Book findByIsbn(String isbn, OpenLibraryService openLibraryService) throws Exception {
+    public Book findByIsbn(String isbn, OpenLibraryService openLibraryService) {
         if (bookRepository.findByIsbn(isbn) == (null)) {
             return openLibraryService.bookInfo(isbn);
         }

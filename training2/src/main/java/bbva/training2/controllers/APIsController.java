@@ -1,6 +1,7 @@
 package bbva.training2.controllers;
 
 import bbva.training2.external.JsonPlaceHolder.dto.Example;
+import bbva.training2.external.JsonPlaceHolder.dto.JsonPlaceHolderDTO;
 import bbva.training2.external.JsonPlaceHolder.services.JsonPlaceHolderService;
 import bbva.training2.external.PublicApi.dto.PublicApiDTO;
 import bbva.training2.external.PublicApi.service.PublicApisService;
@@ -27,8 +28,7 @@ public class APIsController {
     JsonPlaceHolderService jsonPlaceHolderService;
 
     @GetMapping("{param}")
-    public ResponseEntity<PublicApiDTO> getRandom(@PathVariable String param)
-            throws Exception {
+    public ResponseEntity<PublicApiDTO> getRandom(@PathVariable String param) {
         if (param.isEmpty()) {
             throw new NoSuchElementException("No param");
         }
@@ -38,6 +38,14 @@ public class APIsController {
     @GetMapping("JsonPlaceHolder")
     public ResponseEntity<List<Example>> getExample() {
         return new ResponseEntity(jsonPlaceHolderService.getExample(), HttpStatus.OK);
+    }
+
+    @GetMapping("JsonPlaceHolder/{id}")
+    public ResponseEntity<List<JsonPlaceHolderDTO>> getComments(@PathVariable Integer id) {
+        if (id == (null)) {
+            throw new NullPointerException("ID is null, please enter a number");
+        }
+        return new ResponseEntity<>(jsonPlaceHolderService.getComments(id), HttpStatus.OK);
     }
 
     @PostMapping

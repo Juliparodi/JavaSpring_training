@@ -17,7 +17,7 @@ public class Entries {
     private String category;
 
     @JsonProperty("HTTPS")
-    private String https;
+    private boolean https;
 
     @JsonProperty("Auth")
     private String auth;

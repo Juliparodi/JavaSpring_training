@@ -74,11 +74,13 @@ class UserControllerTest {
         String url = VariableConstants.USER_URL.concat(userTest.getUserName());
         mvc.perform(get(url)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsString(jsonUser)))
+                .content(mapper.writeValueAsString(jsonUser))
+                .characterEncoding("utf-8"))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.name", is("julianparodi")))
                 .andReturn();
+
     }
 
     @Test
@@ -93,7 +95,8 @@ class UserControllerTest {
         String url = VariableConstants.USER_URL;
         mvc.perform(get(url)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(mapper.writeValueAsBytes(jsonUser)))
+                .content(mapper.writeValueAsBytes(jsonUser))
+                .characterEncoding("utf-8"))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$[0].userName", is("juli")))
@@ -110,7 +113,8 @@ class UserControllerTest {
                 .thenReturn((userTest));
         mvc.perform(post(VariableConstants.USER_URL.concat("user"))
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonCreateUser.toString()))
+                .content(jsonCreateUser.toString())
+                .characterEncoding("utf-8"))
                 .andExpect(status().isCreated())
                 .andExpect(content().json(jsonUser.toString()))
                 .andExpect(jsonPath("$.name", is("julianparodi")))
@@ -125,7 +129,8 @@ class UserControllerTest {
         String url = (VariableConstants.USER_URL.concat("books") + String
                 .format("?title=%s&username=%s", bookTest.getTitle(), userTest.getUserName()));
         mvc.perform(put(url)
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8"))
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -163,8 +168,10 @@ class UserControllerTest {
     public void whenUpdateUserThatNotExist_thenMessageIsReturned() throws Exception {
         JsonNode jsonUser = mapper
                 .readValue(new File("./JsonFiles/updateUserNotExists.json"), JsonNode.class);
+        Mockito.when(userService.updateUser(userTest, userTest.getName()))
+                .thenReturn(userTest);
 
-        mvc.perform(put(VariableConstants.USER_URL.concat("juli"))
+        mvc.perform(put(VariableConstants.USER_URL.concat(userTest.getName()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonUser.toString()))
                 .andExpect(status().isNotFound());

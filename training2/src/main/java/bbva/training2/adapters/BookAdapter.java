@@ -3,8 +3,6 @@ package bbva.training2.adapters;
 import bbva.training2.external.OpenAPI.dto.BookDTO;
 import bbva.training2.models.Book;
 import bbva.training2.repository.BookRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +12,20 @@ public class BookAdapter {
     @Autowired
     BookRepository bookRepository;
 
+    public Book transformBookDTOToBook(BookDTO bookDTO, String isbn) {
+        String author = bookDTO.getAuthors().get(0).getName();
+        String publishers =
+                (bookDTO.getPublishers().get(0).getName() == null || bookDTO.getPublishers().get(0)
+                        .getName()
+                        .isEmpty()) ? "No publishers"
+                        : bookDTO.getPublishers().get(0).getName();
+        Book book = new Book("null", author, "null", bookDTO.getTitle(), bookDTO.getSubtitle(),
+                publishers, bookDTO.getPublishDate(), bookDTO.getNumberPages(), isbn);
+        return bookRepository.save(book);
+    }
+}
+
+/*
     public BookDTO createBookDTO(String isbn, JsonNode request) {
         BookDTO bookDTO = new BookDTO();
         bookDTO.setIsbn(isbn);
@@ -25,6 +37,7 @@ public class BookAdapter {
         // bookDTO.setAuthors(convertJsonAuthorNodeToString(request.path("authors")));
         return bookDTO;
     }
+    //.stream().collect(Collectors.joining(",")
 
     private String convertJsonPublisherNodeToString(JsonNode publishersNode) {
         AtomicReference<String> publishers = new AtomicReference<>("");
@@ -40,21 +53,9 @@ public class BookAdapter {
         return new String[]{authors.get().substring(0, authors.get().length() - 2)};
     }
 
-    public Book transformBookDTOToBook(BookDTO bookDTO, String isbn) {
-        String author = bookDTO.getAuthors().get(0).toString().substring(13).replace(")", " ")
-                .trim();
-        String publishers =
-                (bookDTO.getPublishers().get(0) == null || bookDTO.getPublishers().get(0)
-                        .toString().isEmpty()) ? "No publishers"
-                        : bookDTO.getPublishers().get(0).toString().substring(16).replace(")", " ")
-                                .trim();
-        Book book = new Book("null", author, "null", bookDTO.getTitle(), bookDTO.getSubtitle(),
-                publishers, bookDTO.getPublishDate(), bookDTO.getNumberPages(), isbn);
-        return bookRepository.save(book);
-    }
-}
 
-     /*
+
+
     private String[] convertJsonNodeToArrayString(JsonNode authorsNode){
         String[] list = new String[authorsNode.size()];
         AtomicReference<Integer> count = new AtomicReference<>(0);

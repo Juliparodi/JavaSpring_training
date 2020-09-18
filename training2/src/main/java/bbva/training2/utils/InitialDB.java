@@ -24,9 +24,9 @@ public class InitialDB {
     @PostConstruct
     public void init() {
         List<User> users = Arrays
-                .asList(new User("julianparodi", "juli123", LocalDate.of(1997, 10, 01)),
-                        new User("matiasbenitez", "mati123", LocalDate.of(1997, 10, 10)),
-                        new User("laufernandez", "lau123", LocalDate.of(1997, 10, 20)));
+                .asList(new User("julianparodi", "juli", LocalDate.of(1997, 10, 01)),
+                        new User("matiasbenitez", "mati", LocalDate.of(1997, 10, 10)),
+                        new User("laufernandez", "lau", LocalDate.of(1997, 10, 20)));
 
         List<Book> books = Arrays
                 .asList(new Book("terror", "Shakespere", "imagen", "IT", "NoSe", "No se", "2019",

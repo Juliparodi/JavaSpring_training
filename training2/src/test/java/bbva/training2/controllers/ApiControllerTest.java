@@ -68,12 +68,6 @@ public class ApiControllerTest {
         verify(getRequestedFor(urlEqualTo("/v1/books/0765304368")));
         verify(getRequestedFor(urlEqualTo("/v1/books/0765304368"))
                 .withHeader("Content-Type", equalTo("application/json")));
-
-        //loggin responses (just to check responses)
-        log.info("----- STATUS CODE: {}", response.code());
-        log.info("----- HEADERS: {}", request.headers().toString());
-        log.info("------ LALA:   {}", response.body().string());
-        log.info("------ title {}", title);
     }
 }
 
@@ -87,3 +81,27 @@ public class ApiControllerTest {
                 .build();
 
          */
+
+//using mvc instead of OkHttpClient
+/*
+WireMockServer wireMockServer = new WireMockServer();
+        wireMockServer.givenThat(
+            WireMock.get(urlEqualTo("/api/books?bibkeys=ISBN:0330258648&format=json&jscmd=data"))
+                .willReturn(aResponse()
+                    .withStatus(200)
+                    .withHeader("Content-Type", "application/json")
+                    .withBodyFile("response_book_not_found.json"))); // Este JSON debería estar en algún lado para usarlo de forma tal que podamos simular lo que te lo contesta la API externa (Si no me equivoco va en src/test/resources/__files -> De acá levanta wiremock
+
+// Se levanta el servidor de mocks
+        wireMockServer.start();
+
+// Hago un get al endpoint que corresponda con el ISBN que corresponda (De forma tal que termine llegando a la URL que mockee)
+        mvc.perform(get("/api/books/search/" + book.getIsbn())
+            .contentType(MediaType.APPLICATION_JSON))
+// Y en este ejemplo supongo que el JSON de ejemplo me dice que no hay libro, entonces mi API debería terminar en un not found (404)
+            .andExpect(status().isNotFound());
+
+// Se detiene el servidor de mocks
+        wireMockServer.stop();
+
+ */

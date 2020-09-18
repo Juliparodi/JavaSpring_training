@@ -1,5 +1,6 @@
 package bbva.training2.controllers;
 
+import bbva.training2.exceptions.BookNotFoundException;
 import bbva.training2.external.OpenAPI.services.OpenLibraryService;
 import bbva.training2.models.Book;
 import bbva.training2.models.User;
@@ -9,7 +10,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.util.List;
-import java.util.Optional;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping("/v1/books/")
+@RequestMapping("/v1/books")
 @Slf4j
 public class BookController {
 
@@ -57,7 +57,7 @@ public class BookController {
         return new ResponseEntity<>(bookService.insertOrUpdate(book), HttpStatus.CREATED);
     }
 
-    @PostMapping("all")
+    @PostMapping("/all")
     @ApiOperation(value = "given a Book list, add all to our repository", response = User.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "succesfully books added"),
@@ -83,7 +83,7 @@ public class BookController {
             @ApiResponse(code = 409, message = "Book/books already on the DB."),
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    public ResponseEntity<Optional<Book>> updateBookById(@RequestBody Book book,
+    public ResponseEntity<Book> updateBookById(@RequestBody Book book,
             @PathVariable long idBook) {
         log.info("----- BOOK OBJECT: '{}', ID '{}'", book, idBook);
         if (book.getIdBook() != idBook) {
@@ -94,14 +94,13 @@ public class BookController {
             log.error("ID not found");
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "ID not found");
         }
-        return new ResponseEntity<>(
-                Optional.of(bookService.updateById(book, idBook)),
+        return new ResponseEntity<>((bookService.updateById(book, idBook)),
                 HttpStatus.OK);
     }
 
     //https://stackoverflow.com/questions/32269192/spring-no-entitymanager-with-actual-transaction-available-for-current-thread
     @Transactional //i used this annotation since i was giving NoEntityManager Exception
-    @DeleteMapping("{title}")
+    @DeleteMapping("/{title}")
     @ApiOperation(value = "given a Book title. delete that book object from our DB", response = User.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "succesfully book deleted"),
@@ -113,14 +112,14 @@ public class BookController {
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
     public ResponseEntity<Integer> deleteByTitle(@PathVariable String title) {
-        if (bookService.findByTitle(title) == (null)) {
+        if (!bookRepository.findByTitle(title).isPresent()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Book with given title not found");
         }
         return new ResponseEntity<>(bookRepository.deleteByTitle(title), HttpStatus.OK);
     }
 
-    @GetMapping("all")
+    @GetMapping("/all")
     @ApiOperation(value = "retrieve all list of books", response = User.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "succesfully list of books showed on the screen"),
@@ -149,11 +148,13 @@ public class BookController {
     })
     public ResponseEntity<Book> findByTitle(@RequestParam(value = "title") String title) {
         log.info("---- title: '{}'", title);
-        return new ResponseEntity(Optional.of(bookService.findByTitle(title))
+        return new ResponseEntity<>((bookRepository.findByTitle(title)).orElseThrow(
+                () -> new BookNotFoundException(
+                        "Book with given title is not present in our catalog"))
                 , HttpStatus.OK);
     }
 
-    @GetMapping("{isbn}") //0765304368
+    @GetMapping("/{isbn}") //0765304368
     @ApiOperation(value = "given a isbn of a book, retrieve from our local DB or from external service", response = User.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "succesfully book showed"),
@@ -186,7 +187,7 @@ public class BookController {
         return new ResponseEntity<>(bookRepository.getBooksCustomQuery(isbn), HttpStatus.OK);
     }
 
-    @GetMapping("customQuery")
+    @GetMapping("/customQuery")
     @ApiOperation(value = "given a some parameters, execute customer SQL query", response = User.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "succesfully list of books showed"),

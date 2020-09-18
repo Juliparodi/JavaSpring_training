@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/publicApi/")
+@RequestMapping("/api/public-api")
 public class APIsController {
 
     @Autowired
@@ -27,7 +27,7 @@ public class APIsController {
     @Autowired
     JsonPlaceHolderService jsonPlaceHolderService;
 
-    @GetMapping("{param}")
+    @GetMapping("/{param}")
     public ResponseEntity<PublicApiDTO> getRandom(@PathVariable String param) {
         if (param.isEmpty()) {
             throw new NoSuchElementException("No param");
@@ -35,12 +35,12 @@ public class APIsController {
         return new ResponseEntity(publicApisService.publicApiInfo(param), HttpStatus.OK);
     }
 
-    @GetMapping("JsonPlaceHolder")
+    @GetMapping("/JsonPlaceHolder")
     public ResponseEntity<List<Example>> getExample() {
         return new ResponseEntity(jsonPlaceHolderService.getExample(), HttpStatus.OK);
     }
 
-    @GetMapping("JsonPlaceHolder/{id}")
+    @GetMapping("/JsonPlaceHolder/{id}")
     public ResponseEntity<List<JsonPlaceHolderDTO>> getComments(@PathVariable Integer id) {
         if (id == (null)) {
             throw new NullPointerException("ID is null, please enter a number");

@@ -1,0 +1,19 @@
+{
+  "userName": "juli",
+  "name": "julianparodi",
+  "birthDate": "1997-10-01",
+  "books": [
+    {
+      "id": 0,
+      "genre": "terror",
+      "author": "Shakespere",
+      "title": "IT",
+      "subtitle": "NoSe",
+      "publisher": "No se",
+      "year": "2019",
+      "pages": 150,
+      "isbn": "123",
+      "users": []
+    }
+  ]
+}

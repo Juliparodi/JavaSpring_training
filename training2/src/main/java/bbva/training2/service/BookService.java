@@ -23,15 +23,6 @@ public class BookService {
     @Autowired
     private BookRepository bookRepository;
 
-    public Book findByTitle(String title) {
-        if (bookRepository.findByTitle(title) == (null)) {
-            log.error("Book with title: '{}' is not present in our catalog", title);
-            throw new BookNotFoundException(
-                    "Book with given title is not present in our catalog");
-        }
-        return bookRepository.findByTitle(title);
-    }
-
     //implementing cache
     @Cacheable(cacheNames = "isbn")
     public Book findByIsbn(String isbn, OpenLibraryService openLibraryService) {
@@ -48,7 +39,7 @@ public class BookService {
 
     public Book insertOrUpdate(Book book) {
         List<Book> books = bookRepository.findAll();
-        if (books.stream().anyMatch(x -> book.equals(x))) {
+        if (books.stream().anyMatch(book1 -> book.equals(book1))) {
             log.error("Book  '{}' is already in our DB", book);
             throw new BookAlreadyOwnException("Book is already in our DB");
         }

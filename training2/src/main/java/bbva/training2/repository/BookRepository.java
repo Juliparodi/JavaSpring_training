@@ -10,7 +10,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     Optional<Book> findByIdBook(long id);
 
-    Book findByTitle(String title);
+    Optional<Book> findByTitle(String title);
 
     Book findByIsbn(String isbn);
 
@@ -20,8 +20,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Query(value = "SELECT u FROM Book u WHERE u.isbn = ?1")
     Book getBooksCustomQuery(String isbn);
-
-    Book findByGenre(String genre);
 
     @Query(value = "SELECT b FROM Book b "
             + "WHERE "

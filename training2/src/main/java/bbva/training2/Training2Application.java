@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 
 
-@SpringBootApplication()
+@SpringBootApplication
 @EnableCaching
 @Slf4j
 public class Training2Application {

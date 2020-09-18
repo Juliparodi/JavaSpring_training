@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import bbva.training2.models.Book;
 import bbva.training2.models.User;
+import bbva.training2.repository.BookRepository;
 import bbva.training2.repository.UserRepository;
 import bbva.training2.service.BookService;
 import bbva.training2.service.UserService;
@@ -51,8 +52,12 @@ class UserControllerTest {
     private UserService userService;
     @MockBean
     private BookService bookService;
+    @MockBean
+    private BookRepository bookRepository;
+
     private User userTest;
     private Book bookTest;
+
     @MockBean
     private UserRepository userRepository;
 
@@ -69,7 +74,7 @@ class UserControllerTest {
     void whenFindByUsernameWhichExist_thenUserIsReturned() throws Exception {
         JsonNode jsonUser = mapper
                 .readValue(new File("./JsonFiles/createUser.json"), JsonNode.class);
-        Mockito.when(userService.findByUserName(userTest.getUserName()))
+        Mockito.when(userRepository.findByUserName(userTest.getUserName()))
                 .thenReturn(Optional.of(userTest));
         String url = VariableConstants.USER_URL.concat(userTest.getUserName());
         mvc.perform(get(url)
@@ -82,6 +87,22 @@ class UserControllerTest {
                 .andReturn();
 
     }
+
+    @Test
+    void whenFindByUsernameWhichNotExist_thenUserErrorIsReturned() throws Exception {
+        JsonNode jsonUser = mapper
+                .readValue(new File("./JsonFiles/userNotFound.json"), JsonNode.class);
+        Mockito.when(userRepository.findByUserName("pepito"))
+                .thenReturn(Optional.empty());
+        String url = VariableConstants.USER_URL.concat("pepito");
+        mvc.perform(get(url)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(jsonUser))
+                .characterEncoding("utf-8"))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
 
     @Test
     void whenFindAllUsers_thenUsersAreReturned() throws Exception {
@@ -121,27 +142,31 @@ class UserControllerTest {
                 .andReturn();
     }
 
+
     @Test
     public void whenAddingBookToUserCollection_ThenUserIsReturned() throws Exception {
-        Mockito.when(userService.findByUserName(userTest.getUserName())).thenReturn(
-                Optional.ofNullable((userTest)));
-        Mockito.when((bookService.findByTitle(bookTest.getTitle()))).thenReturn(bookTest);
+        Mockito.when(userRepository.findByUserName(userTest.getUserName())).thenReturn(
+                Optional.of(userTest));
+        Mockito.when((bookRepository.findByTitle(bookTest.getTitle())))
+                .thenReturn(Optional.of(bookTest));
         String url = (VariableConstants.USER_URL.concat("books") + String
                 .format("?title=%s&username=%s", bookTest.getTitle(), userTest.getUserName()));
         mvc.perform(put(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .characterEncoding("utf-8"))
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isOk());
     }
+
 
     @Test
     public void whenAddingNullBookToUserCollection_ThenMessageIsReturned() throws Exception {
-        Mockito.when(userService.findByUserName(userTest.getUserName()))
+        Mockito.when(userRepository.findByUserName(userTest.getUserName()))
                 .thenReturn(Optional.ofNullable(userTest));
-        Mockito.when((bookService.findByTitle(bookTest.getTitle()))).thenReturn(bookTest);
+        Mockito.when((bookRepository.findByTitle(bookTest.getTitle())))
+                .thenReturn(Optional.empty());
+
         String url = (VariableConstants.USER_URL.concat("books") + String
-                .format("?title=%s&username=%s", "Hercules", userTest.getUserName()));
+                .format("?title=%s&username=%s", bookTest.getTitle(), userTest.getUserName()));
         mvc.perform(put(url)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
@@ -152,7 +177,7 @@ class UserControllerTest {
         JsonNode jsonUpdateUser = mapper
                 .readValue(new File("./JsonFiles/updateUser.json"), JsonNode.class);
         Mockito.when(userService.updateUser(userTest, userTest.getName()))
-                .thenReturn(userTest);
+                .thenReturn(Optional.of(userTest));
         userTest.setUserName("lau");
         userTest.setBirthDate(LocalDate.of(1997, 10, 01));
         mvc.perform(put(VariableConstants.USER_URL.concat(userTest.getName()))
@@ -167,9 +192,9 @@ class UserControllerTest {
     @Test
     public void whenUpdateUserThatNotExist_thenMessageIsReturned() throws Exception {
         JsonNode jsonUser = mapper
-                .readValue(new File("./JsonFiles/updateUserNotExists.json"), JsonNode.class);
+                .readValue(new File("./JsonFiles/updateUser.json"), JsonNode.class);
         Mockito.when(userService.updateUser(userTest, userTest.getName()))
-                .thenReturn(userTest);
+                .thenReturn(Optional.empty());
 
         mvc.perform(put(VariableConstants.USER_URL.concat(userTest.getName()))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -187,6 +212,4 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
     }
-
-
 }

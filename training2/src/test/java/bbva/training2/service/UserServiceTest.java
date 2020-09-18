@@ -1,6 +1,6 @@
 package bbva.training2.service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import bbva.training2.models.User;
 import bbva.training2.repository.UserRepository;
@@ -10,10 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -33,12 +31,14 @@ class UserServiceTest {
     void setUp() {
         userTest = new User("Julian", "juliparodi", LocalDate.of(1997, 10, 1));
 
-        Mockito.when(userRepository.findByUserName(userTest.getUserName())).thenReturn(Optional.of(userTest));
+        Mockito.when(userRepository.findByUserName(userTest.getUserName()))
+                .thenReturn(Optional.of(userTest));
     }
 
     @Test
     void whenValidName_ThenUserShouldBeFound() {
-        User userFound = userService.findByUserName(userTest.getUserName()).get();
-        assertEquals(userService.findByUserName(userFound.getUserName()).get().getUserName(), userTest.getUserName());
+        User userFound = userRepository.findByUserName(userTest.getUserName()).get();
+        assertEquals(userRepository.findByUserName(userFound.getUserName()).get().getUserName(),
+                userTest.getUserName());
     }
 }

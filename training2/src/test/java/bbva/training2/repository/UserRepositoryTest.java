@@ -1,8 +1,10 @@
 package bbva.training2.repository;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import bbva.training2.exceptions.BookNotFoundException;
 import bbva.training2.models.User;
 import bbva.training2.utils.VariableConstants;
 import java.time.LocalDate;
@@ -15,7 +17,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
@@ -23,11 +24,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 @DataJpaTest
 class UserRepositoryTest {
 
+
     @Autowired
     UserRepository userRepository;
     User userTest;
-
-
     @Autowired
     TestEntityManager entityManager;
 
@@ -47,7 +47,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    void whenFindByUserNameThatNotExists_ThenReturnException(){
+    void whenFindByUserNameThatNotExists_ThenReturnException() {
         String userName = VariableConstants.USER_NOT_EXISTS;
         Optional<User> userNotFound = userRepository.findByUserName(userName);
         assertFalse(userNotFound.isPresent());
@@ -55,11 +55,17 @@ class UserRepositoryTest {
 
     //POST METHODS
     @Test
-    void whenSaveUserObject_ThenReturnUserObject(){
+    void whenSaveUserObject_ThenReturnUserObject() {
         User userTest1 = new User("Mati", "mati123", LocalDate.of(1997, 11, 1));
         userRepository.save(userTest1);
         String name = "Mati";
         assertEquals(name, userTest1.getName());
     }
 
+    @Test
+    public void whenCreateUserwithOutUserName_thenThrowException() {
+        userTest.setUserName(null);
+        userTest.setName(null);
+        assertThrows(IllegalArgumentException.class, () -> userRepository.save(userTest));
+    }
 }

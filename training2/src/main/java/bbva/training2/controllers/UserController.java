@@ -1,6 +1,7 @@
 package bbva.training2.controllers;
 
 
+import bbva.training2.exceptions.BookNotFoundException;
 import bbva.training2.exceptions.UserNotFoundException;
 import bbva.training2.exceptions.errors.UserHttpErrors;
 import bbva.training2.models.Book;
@@ -195,6 +196,9 @@ public class UserController {
             @RequestParam(name = "username", required = true) String userName) {
 
         User userFound = userRepository.findByUserName(userName).get();
+        if (!bookRepository.findByTitle(title).isPresent()) {
+            throw new BookNotFoundException("Book not found, please give another title");
+        }
         Book bookToAdd = bookRepository.findByTitle(title).get();
         userFound.addBook(bookToAdd);
         return new ResponseEntity<>(userService.updateUser(userFound, userFound.getName())

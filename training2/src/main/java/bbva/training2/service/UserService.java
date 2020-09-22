@@ -56,6 +56,7 @@ public class UserService {
         return Optional.of(userToUpdate);
     }
 
+    @ApiOperation(value = "Filter by birtdate and return users in between", response = User.class)
     public List<User> foundUserByBetweenBirthday(LocalDate date1, LocalDate date2) {
         return userRepository.findAll().stream()
                 .filter(user -> user.getBirthDate().isAfter(date1) && user.getBirthDate()

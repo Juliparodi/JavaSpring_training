@@ -135,7 +135,7 @@ public class BookController {
         return new ResponseEntity<>(bookRepository.findAll(), HttpStatus.OK);
     }
 
-    @GetMapping()
+    @GetMapping(params = {"title"})
     @ApiOperation(value = "given a title param, retrieve Book object that matches given title", response = User.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "succesfully book showed"),

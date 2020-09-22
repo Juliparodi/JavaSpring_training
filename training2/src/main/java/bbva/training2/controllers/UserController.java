@@ -103,7 +103,7 @@ public class UserController {
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
     public ResponseEntity<User> getUserName(@PathVariable String userName) {
-        return new ResponseEntity<>(userRepository.findByUserName(userName)
+        return new ResponseEntity<>(userService.findByUserName(userName)
                 .orElseThrow(UserNotFoundException::new), HttpStatus.OK);
     }
 

@@ -64,8 +64,9 @@ class UserRepositoryTest {
 
     @Test
     public void whenCreateUserwithOutUserName_thenThrowException() {
-        userTest.setUserName(null);
-        userTest.setName(null);
-        assertThrows(IllegalArgumentException.class, () -> userRepository.save(userTest));
+        User userTest1 = new User("juli", null, LocalDate.of(1997, 11, 1));
+        assertThrows(javax.validation.ConstraintViolationException.class,
+                () -> userRepository.save(userTest1));
+
     }
 }

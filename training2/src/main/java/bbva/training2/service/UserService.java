@@ -2,7 +2,6 @@ package bbva.training2.service;
 
 import bbva.training2.exceptions.UserAlreadyOwnException;
 import bbva.training2.exceptions.UserNotFoundException;
-import bbva.training2.exceptions.errors.UserHttpErrors;
 import bbva.training2.models.User;
 import bbva.training2.repository.UserRepository;
 import io.swagger.annotations.ApiOperation;
@@ -23,11 +22,15 @@ public class UserService {
 
     List<User> users;
 
+    public Optional<User> findByUserName(String userName) {
+        return userRepository.findByUserName(userName);
+    }
+
 
     @ApiOperation(value = "add user object to our DB and if it's already there, return an UserHttpError", response = User.class)
     public User insertUser(User user) {
         users = userRepository.findAll();
-        if (users.stream().anyMatch(x -> user.equals(x))) {
+        if (users.stream().anyMatch(user::equals)) {
             throw new UserAlreadyOwnException("User is already in our DB");
         }
         return userRepository.save(user);
@@ -35,9 +38,8 @@ public class UserService {
 
     @ApiOperation(value = "delete User by userName filter and if it's empty, return an UserHttpError", response = User.class)
     public Integer deleteByUserName(String userName) {
-        users = userRepository.findAll();
         if (!userRepository.findByUserName(userName).isPresent()) {
-            new UserHttpErrors("User is not in our DB").userNotFound();
+            throw new UserNotFoundException("User is not in our DB");
         }
         return userRepository.deleteByUserName(userName);
     }
@@ -51,7 +53,6 @@ public class UserService {
         User userToUpdate = userRepository.findByName(name).get();
         userToUpdate.setUserName(user.getUserName());
         userToUpdate.setBirthDate(user.getBirthDate());
-        userToUpdate.setName(name);
         return Optional.of(userToUpdate);
     }
 

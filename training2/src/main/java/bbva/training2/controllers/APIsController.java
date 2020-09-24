@@ -5,6 +5,9 @@ import bbva.training2.external.JsonPlaceHolder.dto.JsonPlaceHolderDTO;
 import bbva.training2.external.JsonPlaceHolder.services.JsonPlaceHolderService;
 import bbva.training2.external.PublicApi.dto.PublicApiDTO;
 import bbva.training2.external.PublicApi.service.PublicApisService;
+import bbva.training2.external.sumapuntos.dto.DataDTO;
+import bbva.training2.external.sumapuntos.dto.PuntosDTO;
+import bbva.training2.external.sumapuntos.repository.IPuntosRepository;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,11 @@ public class APIsController {
 
     @Autowired
     JsonPlaceHolderService jsonPlaceHolderService;
+
+    @Autowired
+    IPuntosRepository iPuntosRepository;
+
+    DataDTO dataDTO = new DataDTO();
 
     @GetMapping("/{param}")
     public ResponseEntity<PublicApiDTO> getRandom(@PathVariable String param) {
@@ -56,5 +64,26 @@ public class APIsController {
         example1.setBody(example.getBody());
         return new ResponseEntity<Example>(jsonPlaceHolderService.postExample(example1),
                 HttpStatus.CREATED);
+    }
+
+    @PostMapping("/sumapuntos")
+    public ResponseEntity<PuntosDTO> postPuntos(@RequestBody PuntosDTO puntosDTO) {
+        puntosDTO.addDataDTO(puntosDTO.getData()); //to make FK work
+
+        /*
+           DataDTO dataDTO1 = puntosDTO.getData();
+        for (int i = 0; i < dataDTO1.getHistorial().size(); i++) {
+            dataDTO.addHistorial(dataDTO1.getHistorial().get(i));
+        }
+         */
+
+        return new ResponseEntity<>(iPuntosRepository.save(puntosDTO), HttpStatus.CREATED);
+    }
+
+    // DataDTO dataDTO = puntosDTO.getData();
+    //   dataDTO.addDataDTO(puntosDTO);
+    @GetMapping("/sumapuntos")
+    public ResponseEntity<List<PuntosDTO>> getPuntos() {
+        return new ResponseEntity<>(iPuntosRepository.findAll(), HttpStatus.OK);
     }
 }

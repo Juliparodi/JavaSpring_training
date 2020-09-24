@@ -67,6 +67,5 @@ class UserRepositoryTest {
         User userTest1 = new User("juli", null, LocalDate.of(1997, 11, 1));
         assertThrows(javax.validation.ConstraintViolationException.class,
                 () -> userRepository.save(userTest1));
-
     }
 }

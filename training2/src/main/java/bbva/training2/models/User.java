@@ -50,7 +50,7 @@ public class User {
     private LocalDate birthDate;
 
     @ManyToMany(cascade = {CascadeType.REFRESH, CascadeType.MERGE})
-    @JoinTable
+    @JoinTable //This will create a separate TABLE, usually use in ManyToMany
     private List<Book> books = new ArrayList<>();
 
     public User(String name, String userName, LocalDate date) {

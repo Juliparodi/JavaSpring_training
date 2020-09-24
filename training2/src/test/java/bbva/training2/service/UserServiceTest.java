@@ -110,6 +110,7 @@ class UserServiceTest {
                 .isEqualTo(Optional.of(newUser));
     }
 
+    //
     @Test
     void whenUpdateUserThatNotExists_ThenUserNotFoundExceptionIsThrown() {
         Mockito.when(userRepository.findByName(userTest.getName())).thenReturn(Optional.empty());
